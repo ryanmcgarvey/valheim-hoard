@@ -65,45 +65,48 @@ namespace Hoard
             }
             var p = () => Player.m_localPlayer;
 
-            // Container panel: Take all shrinks to make room for Store all beside it; a
-            // second row above holds stack / restock / sort.
-            float w = _takeAllOrigSize.x, h = _takeAllOrigSize.y;
-            float half = w * 0.48f, third = w * 0.315f;
+            // Container panel: in 1.0 the Take All button sits at the top-left of the panel,
+            // above the chest grid. Store all goes beside it; Stack / Restock / Sort form a
+            // second row directly below, still above the grid.
+            float w = _takeAllOrigSize.x, h = _takeAllOrigSize.y, gap = 4f;
             var parent = takeAll.parent;
-            Size(gui.m_takeAllButton, half, h);
-            takeAll.localPosition = _takeAllOrigPos - new Vector3(w * 0.26f, 0f);
+            float px = takeAll.pivot.x;
+            float leftEdge = _takeAllOrigPos.x - w * px;
             _storeAll = Clone(gui, "HoardStoreAll", parent, "Store all", () => StoreTakeAll.StoreAll(p()));
-            Size(_storeAll, half, h);
-            _storeAll.transform.localPosition = _takeAllOrigPos + new Vector3(w * 0.26f, 0f);
-            float rowY = h + 6f;
+            Size(_storeAll, w, h);
+            _storeAll.transform.localPosition = _takeAllOrigPos + new Vector3(w + gap, 0f);
+            float rowWidth = 2f * w + gap;
+            float tw = (rowWidth - 2f * gap) / 3f;
             _stackCont = Clone(gui, "HoardStackContainer", parent, "Stack", () => QuickStack.Run(p(), onlyOpenContainer: true));
             _restockCont = Clone(gui, "HoardRestockContainer", parent, "Restock", () => Restock.Run(p(), onlyOpenContainer: true));
             _sortCont = Clone(gui, "HoardSortContainer", parent, "Sort", () => { var c = InventoryGui.instance?.m_currentContainer; if (c) Sorting.SortContainer(c); });
             Button[] row = { _stackCont, _restockCont, _sortCont };
             for (int i = 0; i < row.Length; i++)
             {
-                Size(row[i], third, h);
-                row[i].transform.localPosition = _takeAllOrigPos + new Vector3((i - 1) * (third + 4f), rowY);
+                Size(row[i], tw, h);
+                row[i].transform.localPosition = new Vector3(leftEdge + tw * px + i * (tw + gap), _takeAllOrigPos.y - (h + gap), _takeAllOrigPos.z);
             }
 
-            // Inventory panel: a row of buttons hanging under the panel background's bottom
-            // edge, left-aligned with the grid. Parented to the background so they follow it
-            // when extra rows stretch it.
-            Transform bkg = gui.m_player.Find("Bkg") ?? gui.m_player;
-            _sortInv = Clone(gui, "HoardSortInventory", bkg, "Sort", () => Sorting.SortPlayer(p()));
-            _stackInv = Clone(gui, "HoardStackInventory", bkg, "Stack", () => QuickStack.Run(p()));
-            _restockInv = Clone(gui, "HoardRestockInventory", bkg, "Restock", () => Restock.Run(p()));
-            _trashInv = Clone(gui, "HoardTrash", bkg, "Trash", () => Trash.OnTrashPressed());
+            // Inventory panel: a column of small buttons in the right-hand strip, between the
+            // armor and weight readouts. That strip belongs to the inventory panel alone, so
+            // the buttons never collide with an open chest.
+            var armor = gui.m_player.Find("Armor");
+            var weight = gui.m_player.Find("Weight");
+            _sortInv = Clone(gui, "HoardSortInventory", gui.m_player, "Sort", () => Sorting.SortPlayer(p()));
+            _stackInv = Clone(gui, "HoardStackInventory", gui.m_player, "Stack", () => QuickStack.Run(p()));
+            _restockInv = Clone(gui, "HoardRestockInventory", gui.m_player, "Restock", () => Restock.Run(p()));
+            _trashInv = Clone(gui, "HoardTrash", gui.m_player, "Trash", () => Trash.OnTrashPressed());
             Button[] mini = { _sortInv, _stackInv, _restockInv, _trashInv };
-            const float bw = 92f, bh = 32f, gap = 6f, left = 14f;
+            Vector3 top = armor ? armor.localPosition : (weight ? weight.localPosition + new Vector3(0f, 300f, 0f) : Vector3.zero);
+            float colX = weight ? weight.localPosition.x : top.x;
             for (int i = 0; i < mini.Length; i++)
             {
                 var rt = (RectTransform)mini[i].transform;
-                rt.anchorMin = rt.anchorMax = new Vector2(0f, 0f);
-                rt.pivot = new Vector2(0f, 1f);
                 rt.localScale = Vector3.one;
-                rt.sizeDelta = new Vector2(bw, bh);
-                rt.anchoredPosition = new Vector2(left + i * (bw + gap), 2f);
+                Size(mini[i], 84f, 32f);
+                rt.localPosition = new Vector3(colX, top.y - 60f - i * 38f, 0f);
+                var t = mini[i].GetComponentInChildren<TMP_Text>();
+                if (t) t.fontSizeMin = 8f;
             }
             var trashText = _trashInv.GetComponentInChildren<TMP_Text>();
             if (trashText) trashText.color = new Color(1f, 0.6f, 0.3f);

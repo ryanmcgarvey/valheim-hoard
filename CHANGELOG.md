@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.2 — 2026-09-11
+
+- Fix: with a chest open, the button rows collided. The inventory's Sort/Stack/Restock/
+  Trash buttons now form a column in the inventory panel's right-hand strip between the
+  armor and weight readouts; the chest's Store all sits beside Take All with Stack/
+  Restock/Sort in a row directly below, above the chest grid. Take All keeps its size.
+
 ## 0.2.1 — 2026-09-11
 
 - Fix: the Sort/Stack/Restock/Trash row was duplicated under the equipment panel and the
