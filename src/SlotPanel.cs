@@ -90,6 +90,9 @@ namespace Hoard
             var darken = player.Find("Darken");
             var bkg = UnityEngine.Object.Instantiate(_invBkg, player, false);
             bkg.name = name;
+            // Only the background image is wanted; anything parented under the inventory
+            // background (the Sort/Stack/Restock/Trash button row) must not be cloned with it.
+            for (int i = bkg.childCount - 1; i >= 0; i--) UnityEngine.Object.Destroy(bkg.GetChild(i).gameObject);
             int anchorIndex = frames != null ? frames.GetSiblingIndex() : darken != null ? darken.GetSiblingIndex() : _invBkg.GetSiblingIndex();
             bkg.SetSiblingIndex(anchorIndex + 1);
             bkg.anchorMin = bkg.anchorMax = new Vector2(0f, 1f);

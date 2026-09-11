@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1 — 2026-09-11
+
+- Fix: the Sort/Stack/Restock/Trash row was duplicated under the equipment panel and the
+  quick slot panel (their backgrounds are clones of the inventory background, which now
+  carried the buttons). Only the inventory panel has the row.
+
 ## 0.2.0 — 2026-09-11
 
 - New: **locked slots**. Ctrl + right-click a slot to lock it (red border). Nothing is
