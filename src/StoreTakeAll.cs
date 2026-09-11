@@ -4,18 +4,18 @@ using HarmonyLib;
 
 namespace Hoard
 {
-    // Store all: dump the inventory (minus favorites, slots, hotbar, equipped) into the
+    // Store all: dump the inventory (minus locked slots, slots, hotbar, equipped) into the
     // open container. Take all: fill the inventory in grid order without vanilla's habit of
     // dropping container items onto their original grid positions (which lands them in
     // the equipment/quick slot region when a chest came from a bigger inventory).
     public static class StoreTakeAll
     {
-        private static bool ShouldStore(ItemDrop.ItemData item, Favorites fav)
+        private static bool ShouldStore(ItemDrop.ItemData item, Locks locks)
         {
             if (item.m_gridPos.y == 0 && !HoardConfig.StoreAllIncludesHotbar.Value) return false;
             if (item.m_equipped && !HoardConfig.StoreAllIncludesEquipped.Value) return false;
             if (Slots.IsSlotCell(item.m_gridPos)) return false;
-            if (fav.IsFavorite(item)) return false;
+            if (locks.IsLocked(item)) return false;
             if (item.m_shared.m_questItem) return false;
             return true;
         }
@@ -26,10 +26,10 @@ namespace Hoard
             if (!gui || !gui.m_currentContainer || player.IsTeleporting()) return;
             if (!Containers.Claim(gui.m_currentContainer)) return;
             gui.SetupDragItem(null, null, 1);
-            var fav = Favorites.For(player);
+            var locks = Locks.For(player);
             var from = player.m_inventory;
             var to = gui.m_currentContainer.GetInventory();
-            var items = from.m_inventory.Where(i => ShouldStore(i, fav)).ToList();
+            var items = from.m_inventory.Where(i => ShouldStore(i, locks)).ToList();
             items.Sort((a, b) => QuickStack.CompareSlotOrder(a.m_gridPos, b.m_gridPos));
             int n = 0;
             foreach (var item in items)

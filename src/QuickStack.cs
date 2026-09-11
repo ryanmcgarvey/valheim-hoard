@@ -15,13 +15,13 @@ namespace Hoard
             return c != 0 ? c : a.x.CompareTo(b.x);
         }
 
-        private static bool ShouldStack(ItemDrop.ItemData item, Favorites fav, bool includeHotbar)
+        private static bool ShouldStack(ItemDrop.ItemData item, Locks locks, bool includeHotbar)
         {
             if (item.m_shared.m_maxStackSize <= 1) return false;
             if (item.m_equipped) return false;
             if (item.m_gridPos.y == 0 && !includeHotbar) return false;
             if (Slots.IsSlotCell(item.m_gridPos)) return false;
-            if (fav.IsFavorite(item)) return false;
+            if (locks.IsLocked(item)) return false;
             return true;
         }
 
@@ -30,8 +30,8 @@ namespace Hoard
             if (!HoardConfig.QuickStackEnabled.Value || player == null || player.IsTeleporting()) return;
             var gui = InventoryGui.instance;
             gui?.SetupDragItem(null, null, 0);
-            var fav = Favorites.For(player);
-            var items = player.m_inventory.m_inventory.Where(i => ShouldStack(i, fav, HoardConfig.QuickStackIncludesHotbar.Value)).ToList();
+            var locks = Locks.For(player);
+            var items = player.m_inventory.m_inventory.Where(i => ShouldStack(i, locks, HoardConfig.QuickStackIncludesHotbar.Value)).ToList();
             if (items.Count == 0)
             {
                 if (HoardConfig.QuickStackMessages.Value) Msg.Center("Nothing to quick stack");

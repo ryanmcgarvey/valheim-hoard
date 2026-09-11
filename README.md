@@ -1,7 +1,7 @@
 # Hoard
 
 One client-side Valheim mod for the inventory chores: **craft from chests**, **quick
-stack / restock / sort / trash / favorites**, **equipment and quick slots**, and a live
+stack / restock / sort / trash / locked slots**, **equipment and quick slots**, and a live
 in-game settings window on **F7**. No dependencies beyond BepInEx. Built for Valheim 1.0.
 
 It replaces three mods that used to do this separately (AzuCraftyBoxes, Quick Stack
@@ -37,11 +37,10 @@ Client-side only: the server needs nothing, and other players don't need the mod
 | **Craft from chests** | Crafting, building, upgrading and single-ingredient recipes count and consume materials from containers within 20 m. Requirement rows show `have/need` including chests; the build menu shows how many pieces you can afford. Smelters, kilns, blast furnaces, fires, cooking stations and fermenters take ore/fuel/food from chests when your inventory has none. Hold **Shift** while using a station to fill it from inventory and chests. |
 | **Quick stack** (`P`) | Moves stackable items into the open chest, or every chest within 10 m that already holds that item. Also replaces the game's hold-E "place stacks". |
 | **Restock** (`L`) | Tops up partial stacks of ammo and food from the open chest or chests in range. |
-| **Sort** (`O`) | Sorts the inventory, or the open chest, by type/name/weight/value. Favorites stay put. |
+| **Sort** (`O`) | Sorts the inventory, or the open chest, by type/name/weight/value. Locked slots stay put. |
 | **Trash** (`Delete` / button) | Destroys the item you're dragging, with confirmation. Quick trash destroys everything trash-flagged. |
-| **Favorites** | **Alt + left-click** an item to favorite it (by name), **Alt + right-click** a slot to favorite the slot. Favorites are never stacked, sorted, stored or trashed. **Alt + Trash button** trash-flags the dragged item instead. |
-| **Locked slots** | **Ctrl + right-click** a slot to lock it (red border). Nothing is ever pulled out of a locked slot: not by crafting, building, station fueling, quick stack, sort, store all or trash, and the game doesn't count its contents as available. Items still stack into it, you can still use or move them by hand, and an empty locked slot is only filled when every other cell is taken. |
-| **Store all / Take all** | *Store all* button on chests (skips favorites, equipped items, hotbar, slots). *Take all* fills your inventory in order and never uses the quick slots. |
+| **Locked slots** | **Ctrl + right-click** a slot to lock it (red border). Automatic actions never touch it: quick stack, sort, store all and trash leave it alone. Things you ask for by hand still work: crafting, building and stations use unlocked stacks first, then nearby chests, and only then a locked slot. Items still stack into it, and an empty locked slot is filled only when every other cell is taken. **Ctrl + Trash button** trash-flags the dragged item (by name) instead of destroying it. |
+| **Store all / Take all** | *Store all* button on chests (skips locked slots, equipped items, hotbar, slots). *Take all* fills your inventory in order and never uses the quick slots. |
 | **Equipment slots** | Dedicated cells for helmet, chest, legs, cape, utility item and trinket, next to the inventory. Drag an unworn helmet onto the Head cell to equip it; drag worn gear onto the grid to unequip. |
 | **Quick slots** | Up to six hotkey cells (`Z`, `V`, `B` by default; slots 4–6 unbound) shown as a second bar next to the hotbar. |
 | **Death** | The tombstone is enlarged to fit everything. On pickup, belts, your armor and the weapon/shield you held are re-equipped. Keeping slot items through death is available but off by default. |

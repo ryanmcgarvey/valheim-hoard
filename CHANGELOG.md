@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0 — 2026-09-11
+
+- Favorites are gone; locked slots are the one mechanism. Ctrl + right-click a slot to
+  lock it. Automatic actions (quick stack, sort, store all, trash) never touch a locked
+  slot. Crafting, building and stations still can, but prefer unlocked stacks, then
+  nearby chests, and use a locked slot only when nothing else covers the cost. The
+  game's requirement counts include locked slots again, so a craft that only a locked
+  stack can pay for shows as affordable.
+- Trash-flagging an item is now Ctrl + click the Trash button while dragging it.
+- Per-character data moved to `Hoard_locks_<id>.txt` (favorites files are no longer read).
+
 ## 0.2.2 — 2026-09-11
 
 - Fix: with a chest open, the button rows collided. The inventory's Sort/Stack/Restock/

@@ -50,7 +50,7 @@ namespace Hoard
             else SortPlayer(player);
         }
 
-        public static void SortPlayer(Player player) => SortInventory(player.m_inventory, Favorites.For(player), HoardConfig.SortIncludesHotbar.Value);
+        public static void SortPlayer(Player player) => SortInventory(player.m_inventory, Locks.For(player), HoardConfig.SortIncludesHotbar.Value);
 
         public static void SortContainer(Container c)
         {
@@ -62,35 +62,35 @@ namespace Hoard
         private static bool IsPlain(ItemDrop.ItemData item)
             => item.m_customData == null || item.m_customData.All(kv => kv.Key.StartsWith("eaqs_") || kv.Key.StartsWith("hoard_"));
 
-        // fav == null means "a container": everything moves.
-        internal static void SortInventory(Inventory inv, Favorites fav, bool includeHotbar)
+        // locks == null means "a container": everything moves.
+        internal static void SortInventory(Inventory inv, Locks locks, bool includeHotbar)
         {
-            bool isPlayer = fav != null;
+            bool isPlayer = locks != null;
             int visibleRows = isPlayer ? Mathf.Min(inv.GetHeight(), Slots.VisibleRows) : inv.GetHeight();
             var items = inv.m_inventory.Where(i =>
                 (!isPlayer || (i.m_gridPos.y > 0 || includeHotbar))
                 && !(isPlayer && Slots.IsSlotCell(i.m_gridPos))
-                && !(isPlayer && fav.IsFavorite(i))).ToList();
+                && !(isPlayer && locks.IsLocked(i))).ToList();
             if (HoardConfig.SortMergesStacks.Value) MergeStacks(items, inv);
             items.Sort(Compare);
 
             // Target cells: bottom row first (the game's own placement for materials),
-            // skipping favorited slots and cells that keep a favorited item.
+            // skipping cells that keep an item that doesn't move; empty locked cells last.
             var reserved = new HashSet<Vector2i>(inv.m_inventory.Where(i => !items.Contains(i)).Select(i => i.m_gridPos));
             var cells = new List<Vector2i>();
-            var skippedFavoriteSlots = new List<Vector2i>();
+            var skippedLockedSlots = new List<Vector2i>();
             int firstRow = (isPlayer && !includeHotbar) ? 1 : 0;
             for (int y = visibleRows - 1; y >= firstRow; y--)
                 for (int x = 0; x < inv.GetWidth(); x++)
                 {
                     var pos = new Vector2i(x, y);
                     if (reserved.Contains(pos)) continue;
-                    if (isPlayer && (fav.IsSlotLocked(pos) || (HoardConfig.SortLeavesFavoriteSlotsEmpty.Value && fav.IsSlotFavorite(pos)))) { skippedFavoriteSlots.Add(pos); continue; }
+                    if (isPlayer && locks.IsLocked(pos)) { skippedLockedSlots.Add(pos); continue; }
                     cells.Add(pos);
                 }
-            // Only if the grid is otherwise full do empty favorited slots get used: an item
+            // Only if the grid is otherwise full do empty locked slots get used: an item
             // must never be left on a cell another item was just moved onto.
-            cells.AddRange(skippedFavoriteSlots);
+            cells.AddRange(skippedLockedSlots);
             int n = Math.Min(items.Count, cells.Count);
             for (int i = 0; i < n; i++) items[i].m_gridPos = cells[i];
             inv.Changed();

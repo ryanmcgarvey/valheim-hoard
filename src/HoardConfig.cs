@@ -47,7 +47,6 @@ namespace Hoard
         public static ConfigEntry<bool> RestockIncludesHotbar;
         public static ConfigEntry<bool> RestockOnlyFromOpenContainer;
         public static ConfigEntry<bool> RestockOnlyAmmoAndConsumables;
-        public static ConfigEntry<bool> RestockOnlyFavorites;
         public static ConfigEntry<int> RestockStackLimit;
         public static ConfigEntry<bool> RestockMessages;
 
@@ -59,7 +58,6 @@ namespace Hoard
         public static ConfigEntry<bool> SortIncludesHotbar;
         public static ConfigEntry<bool> SortMergesStacks;
         public static ConfigEntry<bool> SortBothWhenContainerOpen;
-        public static ConfigEntry<bool> SortLeavesFavoriteSlotsEmpty;
         public static ConfigEntry<AutoSort> SortOnOpen;
 
         // ---- Trash
@@ -72,14 +70,10 @@ namespace Hoard
         public static ConfigEntry<bool> TrophiesAreTrash;
         public static ConfigEntry<bool> NoAutoPickupOfTrash;
 
-        // ---- Favorites
-        public static ConfigEntry<KeyboardShortcut> FavoriteModifier;
+        // ---- Locked slots
         public static ConfigEntry<KeyboardShortcut> LockModifier;
         public static ConfigEntry<Color> LockedSlotColor;
-        public static ConfigEntry<bool> FavoriteTooltips;
-        public static ConfigEntry<Color> FavoriteItemColor;
-        public static ConfigEntry<Color> FavoriteSlotColor;
-        public static ConfigEntry<Color> FavoriteBothColor;
+        public static ConfigEntry<bool> LockTooltips;
         public static ConfigEntry<Color> TrashFlagColor;
 
         // ---- Store / take all
@@ -148,7 +142,7 @@ namespace Hoard
             ContainersIncludeNonPlayerBuilt = cfg.Bind(s, "Include world containers", false, "Area operations may use containers that were not built by a player (dungeon chests, wrecks).");
 
             s = "4 - Quick stack";
-            QuickStackEnabled = cfg.Bind(s, "Enabled", true, "Move stackable items from your inventory into nearby containers that already hold that item.");
+            QuickStackEnabled = cfg.Bind(s, "Enabled", true, "Move stackable items from your inventory into nearby containers that already hold that item. Locked slots are never touched.");
             QuickStackKey = cfg.Bind(s, "Key", new KeyboardShortcut(KeyCode.P), "Quick stack hotkey. Works with the inventory open or closed.");
             QuickStackRange = cfg.Bind(s, "Range", 10f, new ConfigDescription("Containers within this many metres are stacked into. 0 = only the open container.", new AcceptableValueRange<float>(0f, 50f)));
             QuickStackIncludesHotbar = cfg.Bind(s, "Include hotbar", false, "Also stack items out of the hotbar row.");
@@ -164,19 +158,17 @@ namespace Hoard
             RestockIncludesHotbar = cfg.Bind(s, "Include hotbar", true, "Also restock items in the hotbar row.");
             RestockOnlyFromOpenContainer = cfg.Bind(s, "Only open container when one is open", true, "With a chest open, the hotkey restocks from that chest only.");
             RestockOnlyAmmoAndConsumables = cfg.Bind(s, "Only ammo and consumables", true, "Only restock arrows/bolts and food/mead; off restocks every partial stack.");
-            RestockOnlyFavorites = cfg.Bind(s, "Only favorites", false, "Only restock favorited items / items in favorited slots.");
             RestockStackLimit = cfg.Bind(s, "Stack limit", 0, new ConfigDescription("Restock stacks up to this size instead of the maximum. 0 = full stacks.", new AcceptableValueRange<int>(0, 100)));
             RestockMessages = cfg.Bind(s, "Result message", true, "Show how many stacks were restocked.");
 
             s = "6 - Sort";
-            SortEnabled = cfg.Bind(s, "Enabled", true, "Sort the inventory and containers.");
+            SortEnabled = cfg.Bind(s, "Enabled", true, "Sort the inventory and containers. Locked slots stay where they are and empty ones are filled last.");
             SortKey = cfg.Bind(s, "Key", new KeyboardShortcut(KeyCode.O), "Sort hotkey (inventory must be open).");
             SortBy = cfg.Bind(s, "Sort by", SortCriteria.Type, "Primary sort criterion. Ties break by name, then quality, then stack size.");
             SortAscending = cfg.Bind(s, "Ascending", true, "Sort direction.");
             SortIncludesHotbar = cfg.Bind(s, "Include hotbar", false, "Sorting may rearrange the hotbar row.");
             SortMergesStacks = cfg.Bind(s, "Merge stacks", true, "Combine partial stacks of the same item before sorting.");
             SortBothWhenContainerOpen = cfg.Bind(s, "Sort both with container open", false, "With a chest open the hotkey sorts both the chest and your inventory; off sorts only the chest.");
-            SortLeavesFavoriteSlotsEmpty = cfg.Bind(s, "Leave favorite slots empty", true, "Sorting never places items into an empty favorited slot.");
             SortOnOpen = cfg.Bind(s, "Auto sort on open", AutoSort.Never, "Automatically sort when the inventory or a container opens.");
 
             s = "7 - Trash";
@@ -189,18 +181,14 @@ namespace Hoard
             TrophiesAreTrash = cfg.Bind(s, "Trophies count as trash", false, "Treat all non-favorited trophies as trash-flagged.");
             NoAutoPickupOfTrash = cfg.Bind(s, "Do not auto-pickup trash", false, "Trash-flagged items are not auto-picked-up.");
 
-            s = "8 - Favorites";
-            FavoriteModifier = cfg.Bind(s, "Favorite modifier", new KeyboardShortcut(KeyCode.LeftAlt), "Hold this and left-click an item to favorite/unfavorite it (by name), right-click a slot to favorite the slot. Favorites are never stacked, sorted, stored or trashed. Hold it and click the trash can with an item to trash-flag the item instead.");
-            LockModifier = cfg.Bind(s, "Lock modifier", new KeyboardShortcut(KeyCode.LeftControl), "Hold this and right-click a slot to lock/unlock it. Nothing is ever pulled out of a locked slot: not by crafting, building, stations, quick stack, sort, store all or trash. Items still stack INTO it, and it is used as a last resort when every other cell is full.");
+            s = "8 - Locked slots";
+            LockModifier = cfg.Bind(s, "Lock modifier", new KeyboardShortcut(KeyCode.LeftControl), "Hold this and right-click a slot to lock/unlock it. Automatic actions (quick stack, sort, store all, trash) never touch a locked slot. Crafting, building and stations may still use its contents, but only after every unlocked stack and every nearby chest is used up. Items still stack into it, and it is filled only when every other cell is taken. Hold it and click the Trash button with an item to trash-flag that item instead of destroying it.");
             LockedSlotColor = cfg.Bind(s, "Locked slot color", new Color(0.9f, 0.25f, 0.2f, 1f), "Border color of locked slots.");
-            FavoriteTooltips = cfg.Bind(s, "Tooltip hints", true, "Item tooltips mention favorite / trash-flag status.");
-            FavoriteItemColor = cfg.Bind(s, "Favorite item color", new Color(1f, 0.85f, 0f, 1f), "Border color of favorited items.");
-            FavoriteSlotColor = cfg.Bind(s, "Favorite slot color", new Color(0f, 0.5f, 1f, 1f), "Border color of favorited slots.");
-            FavoriteBothColor = cfg.Bind(s, "Favorite item in favorite slot color", new Color(0.5f, 0.67f, 0.5f, 1f), "Border color when a favorited item sits in a favorited slot.");
             TrashFlagColor = cfg.Bind(s, "Trash-flagged color", new Color(0.5f, 0f, 0f, 1f), "Border color of trash-flagged items.");
+            LockTooltips = cfg.Bind(s, "Tooltip hints", true, "Item tooltips mention locked-slot / trash-flag status.");
 
             s = "9 - Store and take all";
-            StoreAllButton = cfg.Bind(s, "Store all button", true, "Show a 'Store all' button on open containers (moves everything except favorites, equipped items, hotbar and slots).");
+            StoreAllButton = cfg.Bind(s, "Store all button", true, "Show a 'Store all' button on open containers (moves everything except locked slots, equipped items, hotbar and slots).");
             StoreAllKey = cfg.Bind(s, "Store all key", KeyboardShortcut.Empty, "Store all hotkey (container open).");
             StoreAllIncludesHotbar = cfg.Bind(s, "Store all includes hotbar", false, "Store all also empties the hotbar row.");
             StoreAllIncludesEquipped = cfg.Bind(s, "Store all includes equipped", false, "Store all also unequips and stores worn items.");

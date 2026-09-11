@@ -164,20 +164,26 @@ namespace Hoard
             private static void Finalizer() => _consuming--;
         }
 
+        // Order of preference when paying: unlocked stacks in the inventory, then nearby
+        // chests, then locked slots (Locks.Inventory_RemoveItem_ByName hides those from the
+        // game's removal loop whenever the rest suffices). Priority.High so this runs before
+        // that guard and it sees the reduced amount.
         [HarmonyPatch(typeof(Inventory), nameof(Inventory.RemoveItem), typeof(string), typeof(int), typeof(int), typeof(bool))]
         private static class Inventory_RemoveItem_ByName
         {
+            [HarmonyPriority(Priority.High)]
             private static void Prefix(Inventory __instance, string name, ref int amount, int itemQuality, bool worldLevelBased)
             {
                 if (!Consuming || !Enabled) return;
                 var p = Player.m_localPlayer;
                 if (!p || __instance != p.m_inventory) return;
-                int inInventory = __instance.CountItems(name, itemQuality, worldLevelBased);
-                int shortfall = amount - inInventory;
+                int unlocked = Locks.For(p).CountUnlocked(__instance, name, itemQuality);
+                int shortfall = amount - unlocked;
                 if (shortfall <= 0) return;
                 int taken = Containers.Remove(Containers.ForCrafting(), name, shortfall, itemQuality);
                 amount -= taken;
-                if (taken < shortfall) Log.Warn($"Consumed {taken}/{shortfall} {name} from containers; short by {shortfall - taken}");
+                if (taken < shortfall && __instance.CountItems(name, itemQuality, worldLevelBased) < amount)
+                    Log.Warn($"Consumed {taken}/{shortfall} {name} from containers; short by {amount - __instance.CountItems(name, itemQuality, worldLevelBased)}");
             }
         }
 

@@ -16,11 +16,14 @@ namespace Hoard
         private static bool FillAll => HoardConfig.FillAllKey.Value.IsHeld();
         private static bool IsLocal(Humanoid user) => user != null && user == Player.m_localPlayer;
 
+        // Unlocked stacks first, then a chest, then (vanilla's own lookup) a locked slot.
         private static bool EnsureOne(Humanoid user, string sharedName, Component station)
         {
-            if (user.GetInventory().HaveItem(sharedName)) return true;
+            var inv = user.GetInventory();
+            if (user is Player p && Locks.For(p).CountUnlocked(inv, sharedName) > 0) return true;
             var near = Containers.Nearby(station.transform.position, HoardConfig.CraftRange.Value);
-            return Containers.PullOne(near, sharedName, user.GetInventory());
+            if (Containers.PullOne(near, sharedName, inv)) return true;
+            return inv.HaveItem(sharedName);
         }
 
         // How many of `sharedName` can the user get their hands on right now.

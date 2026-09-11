@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Hoard
 {
     // Trash can: destroy the item you are dragging (with confirmation unless it is
-    // trash-flagged), or with the favorite modifier held, trash-flag it instead. Quick trash
+    // trash-flagged), or with the lock modifier held, trash-flag it instead. Quick trash
     // destroys every trash-flagged item in the inventory at once.
     public static class Trash
     {
@@ -20,15 +20,15 @@ namespace Hoard
         {
             if (!Enabled || _pending != Pending.None || !InventoryGui.instance) return;
             if (InventoryGui.instance.m_dragGo)
-                _pending = Favorites.InFavoritingMode() ? Pending.Flag : Pending.Trash;
-            else if (!fromHotkey && !Favorites.InFavoritingMode())
+                _pending = Locks.InLockMode() ? Pending.Flag : Pending.Trash;
+            else if (!fromHotkey && !Locks.InLockMode())
                 _pending = Pending.Quick;
         }
 
         public static void OnQuickTrashPressed()
         {
             if (!Enabled || _pending != Pending.None || !InventoryGui.instance || InventoryGui.instance.m_dragGo) return;
-            if (Favorites.InFavoritingMode()) return;
+            if (Locks.InLockMode()) return;
             _pending = Pending.Quick;
         }
 
@@ -42,13 +42,13 @@ namespace Hoard
                 _pending = Pending.None;
                 var player = Player.m_localPlayer;
                 if (!player) return;
-                var fav = Favorites.For(player);
+                var locks = Locks.For(player);
 
                 if (pending == Pending.Quick)
                 {
                     if (HoardConfig.QuickTrashConfirm.Value)
-                        Confirm("Quick trash", "Destroy every trash-flagged item in your inventory?", () => QuickTrash(player, fav));
-                    else QuickTrash(player, fav);
+                        Confirm("Quick trash", "Destroy every trash-flagged item in your inventory?", () => QuickTrash(player, locks));
+                    else QuickTrash(player, locks);
                     return;
                 }
 
@@ -59,7 +59,8 @@ namespace Hoard
 
                 if (pending == Pending.Flag)
                 {
-                    if (!fav.ToggleTrash(item.m_shared)) Msg.Center("Can't trash-flag a favorited item");
+                    locks.ToggleTrash(item.m_shared);
+                    Msg.Center(locks.IsTrashFlagged(item.m_shared) ? "Trash-flagged" : "Trash flag removed");
                     return;
                 }
 
@@ -69,12 +70,12 @@ namespace Hoard
                     Msg.Center("Hotbar items are protected from trashing");
                     return;
                 }
-                if ((inPlayerInv && fav.IsSlotProtected(item.m_gridPos)) || fav.IsItemFavorite(item.m_shared))
+                if (inPlayerInv && locks.IsLocked(item))
                 {
-                    Msg.Center("Favorited items can't be trashed");
+                    Msg.Center("That slot is locked");
                     return;
                 }
-                if (HoardConfig.TrashConfirm.Value && !fav.IsConsideredTrash(item.m_shared))
+                if (HoardConfig.TrashConfirm.Value && !locks.IsConsideredTrash(item.m_shared))
                     Confirm(Localization.instance.Localize(item.m_shared.m_name), $"Destroy {amount}/{item.m_shared.m_maxStackSize}?", () => TrashItem(__instance, inv, item, amount));
                 else
                     TrashItem(__instance, inv, item, amount);
@@ -107,7 +108,7 @@ namespace Hoard
             Log.Debug($"trashed {amount} x {item.m_shared.m_name}");
         }
 
-        private static void QuickTrash(Player player, Favorites fav)
+        private static void QuickTrash(Player player, Locks locks)
         {
             int n = 0;
             var inv = player.m_inventory;
@@ -116,7 +117,7 @@ namespace Hoard
                 var item = inv.m_inventory[i];
                 if (item.m_gridPos.y == 0 && !HoardConfig.TrashCanAffectHotbar.Value) continue;
                 if (Slots.IsSlotCell(item.m_gridPos)) continue;
-                if (fav.IsSlotProtected(item.m_gridPos) || !fav.IsConsideredTrash(item.m_shared)) continue;
+                if (locks.IsLocked(item) || !locks.IsConsideredTrash(item.m_shared)) continue;
                 player.RemoveEquipAction(item);
                 player.UnequipItem(item, false);
                 inv.RemoveItem(item);

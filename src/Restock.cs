@@ -24,7 +24,7 @@ namespace Hoard
         private static bool IsPlain(ItemDrop.ItemData item)
             => item.m_customData == null || item.m_customData.All(kv => kv.Key.StartsWith("eaqs_") || kv.Key.StartsWith("hoard_"));
 
-        private static bool ShouldRestock(ItemDrop.ItemData item, Favorites fav, bool includeHotbar)
+        private static bool ShouldRestock(ItemDrop.ItemData item, bool includeHotbar)
         {
             int target = TargetStack(item.m_shared);
             if (target <= 1 || item.m_stack >= target) return false;
@@ -33,7 +33,6 @@ namespace Hoard
             if (Slots.IsEquipmentCell(item.m_gridPos)) return false;
             var t = item.m_shared.m_itemType;
             if (HoardConfig.RestockOnlyAmmoAndConsumables.Value && t != ItemDrop.ItemData.ItemType.Ammo && t != ItemDrop.ItemData.ItemType.Consumable) return false;
-            if (HoardConfig.RestockOnlyFavorites.Value && !fav.IsFavorite(item)) return false;
             return true;
         }
 
@@ -42,9 +41,8 @@ namespace Hoard
             if (!HoardConfig.RestockEnabled.Value || player == null || player.IsTeleporting()) return;
             var gui = InventoryGui.instance;
             gui?.SetupDragItem(null, null, 0);
-            var fav = Favorites.For(player);
             var wants = player.m_inventory.m_inventory
-                .Where(i => ShouldRestock(i, fav, HoardConfig.RestockIncludesHotbar.Value))
+                .Where(i => ShouldRestock(i, HoardConfig.RestockIncludesHotbar.Value))
                 .Select(i => new Want { item = i, have = i.m_stack, target = TargetStack(i.m_shared) })
                 .ToList();
             int total = wants.Count;
