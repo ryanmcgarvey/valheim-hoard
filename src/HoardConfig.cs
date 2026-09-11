@@ -13,6 +13,7 @@ namespace Hoard
 
         // ---- General
         public static ConfigEntry<KeyboardShortcut> ConfigWindowKey;
+        public static ConfigEntry<float> ConfigWindowScale;
         public static ConfigEntry<bool> DebugLogging;
 
         // ---- Craft from containers
@@ -73,6 +74,8 @@ namespace Hoard
 
         // ---- Favorites
         public static ConfigEntry<KeyboardShortcut> FavoriteModifier;
+        public static ConfigEntry<KeyboardShortcut> LockModifier;
+        public static ConfigEntry<Color> LockedSlotColor;
         public static ConfigEntry<bool> FavoriteTooltips;
         public static ConfigEntry<Color> FavoriteItemColor;
         public static ConfigEntry<Color> FavoriteSlotColor;
@@ -127,6 +130,7 @@ namespace Hoard
 
             s = "1 - General";
             ConfigWindowKey = cfg.Bind(s, "Config window key", new KeyboardShortcut(KeyCode.F7), "Opens the in-game settings window for this mod. Everything applies live.");
+            ConfigWindowScale = cfg.Bind(s, "Config window scale", 1f, new ConfigDescription("Extra scale for the settings window on top of the game's own UI scale.", new AcceptableValueRange<float>(0.5f, 2.5f)));
             DebugLogging = cfg.Bind(s, "Debug logging", false, "Verbose log output for troubleshooting.");
 
             s = "2 - Craft from containers";
@@ -187,6 +191,8 @@ namespace Hoard
 
             s = "8 - Favorites";
             FavoriteModifier = cfg.Bind(s, "Favorite modifier", new KeyboardShortcut(KeyCode.LeftAlt), "Hold this and left-click an item to favorite/unfavorite it (by name), right-click a slot to favorite the slot. Favorites are never stacked, sorted, stored or trashed. Hold it and click the trash can with an item to trash-flag the item instead.");
+            LockModifier = cfg.Bind(s, "Lock modifier", new KeyboardShortcut(KeyCode.LeftControl), "Hold this and right-click a slot to lock/unlock it. Nothing is ever pulled out of a locked slot: not by crafting, building, stations, quick stack, sort, store all or trash. Items still stack INTO it, and it is used as a last resort when every other cell is full.");
+            LockedSlotColor = cfg.Bind(s, "Locked slot color", new Color(0.9f, 0.25f, 0.2f, 1f), "Border color of locked slots.");
             FavoriteTooltips = cfg.Bind(s, "Tooltip hints", true, "Item tooltips mention favorite / trash-flag status.");
             FavoriteItemColor = cfg.Bind(s, "Favorite item color", new Color(1f, 0.85f, 0f, 1f), "Border color of favorited items.");
             FavoriteSlotColor = cfg.Bind(s, "Favorite slot color", new Color(0f, 0.5f, 1f, 1f), "Border color of favorited slots.");

@@ -85,7 +85,7 @@ namespace Hoard
                 {
                     var pos = new Vector2i(x, y);
                     if (reserved.Contains(pos)) continue;
-                    if (isPlayer && HoardConfig.SortLeavesFavoriteSlotsEmpty.Value && fav.IsSlotFavorite(pos)) { skippedFavoriteSlots.Add(pos); continue; }
+                    if (isPlayer && (fav.IsSlotLocked(pos) || (HoardConfig.SortLeavesFavoriteSlotsEmpty.Value && fav.IsSlotFavorite(pos)))) { skippedFavoriteSlots.Add(pos); continue; }
                     cells.Add(pos);
                 }
             // Only if the grid is otherwise full do empty favorited slots get used: an item

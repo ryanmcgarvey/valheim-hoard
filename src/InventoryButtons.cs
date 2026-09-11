@@ -86,19 +86,24 @@ namespace Hoard
                 row[i].transform.localPosition = _takeAllOrigPos + new Vector3((i - 1) * (third + 4f), rowY);
             }
 
-            // Inventory panel: mini buttons under the weight readout (bottom right of the
-            // player panel), running leftwards.
-            var anchor = gui.m_player.Find("Weight");
-            _sortInv = Clone(gui, "HoardSortInventory", gui.m_player, "Sort", () => Sorting.SortPlayer(p()));
-            _stackInv = Clone(gui, "HoardStackInventory", gui.m_player, "Stack", () => QuickStack.Run(p()));
-            _restockInv = Clone(gui, "HoardRestockInventory", gui.m_player, "Restock", () => Restock.Run(p()));
-            _trashInv = Clone(gui, "HoardTrash", gui.m_player, "Trash", () => Trash.OnTrashPressed());
+            // Inventory panel: a row of buttons hanging under the panel background's bottom
+            // edge, left-aligned with the grid. Parented to the background so they follow it
+            // when extra rows stretch it.
+            Transform bkg = gui.m_player.Find("Bkg") ?? gui.m_player;
+            _sortInv = Clone(gui, "HoardSortInventory", bkg, "Sort", () => Sorting.SortPlayer(p()));
+            _stackInv = Clone(gui, "HoardStackInventory", bkg, "Stack", () => QuickStack.Run(p()));
+            _restockInv = Clone(gui, "HoardRestockInventory", bkg, "Restock", () => Restock.Run(p()));
+            _trashInv = Clone(gui, "HoardTrash", bkg, "Trash", () => Trash.OnTrashPressed());
             Button[] mini = { _sortInv, _stackInv, _restockInv, _trashInv };
+            const float bw = 92f, bh = 32f, gap = 6f, left = 14f;
             for (int i = 0; i < mini.Length; i++)
             {
-                Size(mini[i], 54f, 30f);
-                Vector3 basePos = anchor ? anchor.localPosition : Vector3.zero;
-                mini[i].transform.localPosition = basePos + new Vector3(1f - i * 58f, -56f, 0f);
+                var rt = (RectTransform)mini[i].transform;
+                rt.anchorMin = rt.anchorMax = new Vector2(0f, 0f);
+                rt.pivot = new Vector2(0f, 1f);
+                rt.localScale = Vector3.one;
+                rt.sizeDelta = new Vector2(bw, bh);
+                rt.anchoredPosition = new Vector2(left + i * (bw + gap), 2f);
             }
             var trashText = _trashInv.GetComponentInChildren<TMP_Text>();
             if (trashText) trashText.color = new Color(1f, 0.6f, 0.3f);

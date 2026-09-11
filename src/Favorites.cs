@@ -32,6 +32,7 @@ namespace Hoard
 
         private readonly string _path;
         private readonly HashSet<Vector2i> _slots = new HashSet<Vector2i>();
+        private readonly HashSet<Vector2i> _locked = new HashSet<Vector2i>();
         private readonly HashSet<string> _items = new HashSet<string>();
         private readonly HashSet<string> _trash = new HashSet<string>();
 
@@ -58,6 +59,10 @@ namespace Hoard
                             var xy = val.Split(',');
                             if (xy.Length == 2 && int.TryParse(xy[0], out int x) && int.TryParse(xy[1], out int y)) _slots.Add(new Vector2i(x, y));
                             break;
+                        case "lock":
+                            var lxy = val.Split(',');
+                            if (lxy.Length == 2 && int.TryParse(lxy[0], out int lx) && int.TryParse(lxy[1], out int ly)) _locked.Add(new Vector2i(lx, ly));
+                            break;
                         case "item": _items.Add(val); break;
                         case "trash": _trash.Add(val); break;
                     }
@@ -72,6 +77,7 @@ namespace Hoard
             {
                 var lines = new List<string>();
                 foreach (var s in _slots) lines.Add($"slot:{s.x},{s.y}");
+                foreach (var s in _locked) lines.Add($"lock:{s.x},{s.y}");
                 foreach (var s in _items) lines.Add($"item:{s}");
                 foreach (var s in _trash) lines.Add($"trash:{s}");
                 File.WriteAllLines(_path, lines);
@@ -80,8 +86,12 @@ namespace Hoard
         }
 
         public bool IsSlotFavorite(Vector2i pos) => _slots.Contains(pos);
+        public bool IsSlotLocked(Vector2i pos) => _locked.Contains(pos);
+        public bool HasLockedSlots => _locked.Count > 0;
+        // Favorited or locked: the slot's contents stay where they are.
+        public bool IsSlotProtected(Vector2i pos) => _slots.Contains(pos) || _locked.Contains(pos);
         public bool IsItemFavorite(ItemDrop.ItemData.SharedData shared) => _items.Contains(shared.m_name);
-        public bool IsFavorite(ItemDrop.ItemData item) => IsItemFavorite(item.m_shared) || IsSlotFavorite(item.m_gridPos);
+        public bool IsFavorite(ItemDrop.ItemData item) => IsItemFavorite(item.m_shared) || IsSlotProtected(item.m_gridPos);
         public bool IsTrashFlagged(ItemDrop.ItemData.SharedData shared) => _trash.Contains(shared.m_name);
 
         public bool IsConsideredTrash(ItemDrop.ItemData.SharedData shared)
@@ -94,6 +104,12 @@ namespace Hoard
         public void ToggleSlot(Vector2i pos)
         {
             if (!_slots.Remove(pos)) _slots.Add(pos);
+            Save();
+        }
+
+        public void ToggleLock(Vector2i pos)
+        {
+            if (!_locked.Remove(pos)) _locked.Add(pos);
             Save();
         }
 
@@ -116,13 +132,14 @@ namespace Hoard
 
         public void ResetAll()
         {
-            _slots.Clear(); _items.Clear(); _trash.Clear();
+            _slots.Clear(); _locked.Clear(); _items.Clear(); _trash.Clear();
             Save();
         }
 
         // ---- favoriting mode: hold the modifier and click
 
         public static bool InFavoritingMode() => HoardConfig.FavoriteModifier.Value.IsHeld();
+        public static bool InLockMode() => HoardConfig.LockModifier.Value.IsHeld();
 
         // Left-click with the modifier favorites the item under the cursor; right-click
         // favorites the slot. Both swallow the click so nothing gets picked up.
@@ -143,10 +160,17 @@ namespace Hoard
             var gui = InventoryGui.instance;
             var player = Player.m_localPlayer;
             if (!gui || !player || grid != gui.m_playerGrid) return true;
-            if (gui.m_dragGo || player.IsTeleporting() || !InFavoritingMode()) return true;
+            if (gui.m_dragGo || player.IsTeleporting()) return true;
+            bool lockMode = !left && InLockMode();
+            if (!lockMode && !InFavoritingMode()) return true;
             Vector2i pos = grid.GetButtonPos(go);
             if (pos.x < 0) return true;
             var fav = For(player);
+            if (lockMode)
+            {
+                fav.ToggleLock(pos);
+                return false;
+            }
             if (!left)
             {
                 fav.ToggleSlot(pos);
@@ -227,9 +251,11 @@ namespace Hoard
                 {
                     if (!el) continue;
                     var img = BorderFor(el);
+                    bool locked = fav.IsSlotLocked(el.Position);
                     bool slotFav = fav.IsSlotFavorite(el.Position);
-                    img.enabled = slotFav;
-                    if (slotFav) img.color = HoardConfig.FavoriteSlotColor.Value;
+                    img.enabled = slotFav || locked;
+                    if (locked) img.color = HoardConfig.LockedSlotColor.Value;
+                    else if (slotFav) img.color = HoardConfig.FavoriteSlotColor.Value;
                 }
                 foreach (var item in __instance.m_inventory.m_inventory)
                 {
@@ -277,6 +303,112 @@ namespace Hoard
             {
                 foreach (var d in _touched) if (d) d.m_autoPickup = true;
                 _touched.Clear();
+            }
+        }
+
+        // ---- locked slots: nothing is pulled out of them
+
+        // Every consumer of inventory items by NAME (crafting, building, fuel, cooking,
+        // fermenting, and the counts that decide whether those are allowed) goes through
+        // Inventory.CountItems / HaveItem / GetItem / RemoveItem(name). While one of those runs
+        // on the player's inventory, the items in locked cells are lifted out of the list
+        // and put back afterwards. Nothing else changes, so stacking INTO a locked cell,
+        // using or eating from it by hand, and moving it around all keep working.
+        private static class LockGuard
+        {
+            private static readonly Stack<List<ItemDrop.ItemData>> _hidden = new Stack<List<ItemDrop.ItemData>>();
+
+            public static void Hide(Inventory inv)
+            {
+                var player = Player.m_localPlayer;
+                if (!player || inv != player.m_inventory) { _hidden.Push(null); return; }
+                var fav = For(player);
+                if (!fav.HasLockedSlots) { _hidden.Push(null); return; }
+                List<ItemDrop.ItemData> list = null;
+                for (int i = inv.m_inventory.Count - 1; i >= 0; i--)
+                {
+                    var item = inv.m_inventory[i];
+                    if (!fav.IsSlotLocked(item.m_gridPos)) continue;
+                    (list ??= new List<ItemDrop.ItemData>()).Add(item);
+                    inv.m_inventory.RemoveAt(i);
+                }
+                _hidden.Push(list);
+            }
+
+            public static void Restore(Inventory inv)
+            {
+                if (_hidden.Count == 0) return;
+                var list = _hidden.Pop();
+                if (list != null) inv.m_inventory.AddRange(list);
+            }
+
+            // A Changed() inside the guarded call (RemoveItem ends with one) must see the whole
+            // inventory: weight, known items and every listener depend on it.
+            public static void RestoreAll(Inventory inv)
+            {
+                while (_hidden.Count > 0) Restore(inv);
+            }
+        }
+
+        [HarmonyPatch(typeof(Inventory), nameof(Inventory.CountItems))]
+        private static class Inventory_CountItems
+        {
+            [HarmonyPriority(Priority.First)] private static void Prefix(Inventory __instance, string name) { if (name != null) LockGuard.Hide(__instance); else LockGuard.Hide(null); }
+            [HarmonyPriority(Priority.First)] private static void Finalizer(Inventory __instance) => LockGuard.Restore(__instance);
+        }
+
+        [HarmonyPatch(typeof(Inventory), nameof(Inventory.HaveItem), typeof(string), typeof(bool))]
+        private static class Inventory_HaveItem
+        {
+            [HarmonyPriority(Priority.First)] private static void Prefix(Inventory __instance) => LockGuard.Hide(__instance);
+            [HarmonyPriority(Priority.First)] private static void Finalizer(Inventory __instance) => LockGuard.Restore(__instance);
+        }
+
+        [HarmonyPatch(typeof(Inventory), nameof(Inventory.GetItem), typeof(string), typeof(int), typeof(bool))]
+        private static class Inventory_GetItem
+        {
+            [HarmonyPriority(Priority.First)] private static void Prefix(Inventory __instance) => LockGuard.Hide(__instance);
+            [HarmonyPriority(Priority.First)] private static void Finalizer(Inventory __instance) => LockGuard.Restore(__instance);
+        }
+
+        [HarmonyPatch(typeof(Inventory), nameof(Inventory.RemoveItem), typeof(string), typeof(int), typeof(int), typeof(bool))]
+        private static class Inventory_RemoveItem_ByName
+        {
+            // Priority.High: after Crafting's prefix (which counts what the inventory can give),
+            // before the original.
+            [HarmonyPriority(Priority.High)] private static void Prefix(Inventory __instance) => LockGuard.Hide(__instance);
+            [HarmonyPriority(Priority.High)] private static void Finalizer(Inventory __instance) => LockGuard.Restore(__instance);
+        }
+
+        [HarmonyPatch(typeof(Inventory), nameof(Inventory.Changed))]
+        private static class Inventory_Changed
+        {
+            [HarmonyPriority(Priority.First)] private static void Prefix(Inventory __instance) => LockGuard.RestoreAll(__instance);
+        }
+
+        // New items go to an empty locked cell only when no other cell is free.
+        [HarmonyPatch(typeof(Inventory), nameof(Inventory.FindEmptySlot))]
+        private static class Inventory_FindEmptySlot
+        {
+            [HarmonyPriority(Priority.Low)]
+            private static void Postfix(Inventory __instance, bool topFirst, ref Vector2i __result)
+            {
+                var player = Player.m_localPlayer;
+                if (!player || __instance != player.m_inventory || __result.x < 0) return;
+                var fav = For(player);
+                if (!fav.HasLockedSlots || !fav.IsSlotLocked(__result)) return;
+                int rows = Mathf.Min(__instance.m_height, Slots.VisibleRows);
+                for (int r = 0; r < rows; r++)
+                {
+                    int y = topFirst ? r : rows - 1 - r;
+                    for (int x = 0; x < __instance.m_width; x++)
+                    {
+                        var pos = new Vector2i(x, y);
+                        if (fav.IsSlotLocked(pos) || __instance.GetItemAt(x, y) != null) continue;
+                        __result = pos;
+                        return;
+                    }
+                }
             }
         }
     }

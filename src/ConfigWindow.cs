@@ -14,7 +14,8 @@ namespace Hoard
     {
         public static bool Visible { get; private set; }
 
-        private static Rect _rect = new Rect(80f, 80f, 760f, 720f);
+        // Laid out in 1080p-equivalent units and scaled with the game's own UI scale.
+        private static Rect _rect = new Rect(60f, 60f, 960f, 900f);
         private static Vector2 _scroll;
         private static string _search = "";
         private static readonly HashSet<string> _collapsed = new HashSet<string>();
@@ -86,10 +87,20 @@ namespace Hoard
                 e.Use();
                 return;
             }
-            _rect.width = Mathf.Min(_rect.width, Screen.width - 20);
-            _rect.height = Mathf.Min(_rect.height, Screen.height - 20);
+            // Same factor GuiScaler applies to the game's canvases (screen / 1920x1080, times the
+            // user's GUI scale), so the window matches the rest of the UI on any display.
+            float scale = Mathf.Min(Screen.width / 1920f, Screen.height / 1080f) * GuiScaler.m_largeGuiScale * HoardConfig.ConfigWindowScale.Value;
+            if (scale <= 0.05f) scale = 1f;
+            var saved = GUI.matrix;
+            GUI.matrix = Matrix4x4.Scale(new Vector3(scale, scale, 1f));
+            float maxW = Screen.width / scale - 20f, maxH = Screen.height / scale - 20f;
+            _rect.width = Mathf.Min(_rect.width, maxW);
+            _rect.height = Mathf.Min(_rect.height, maxH);
+            _rect.x = Mathf.Clamp(_rect.x, 0f, Mathf.Max(0f, maxW - _rect.width + 10f));
+            _rect.y = Mathf.Clamp(_rect.y, 0f, Mathf.Max(0f, maxH - _rect.height + 10f));
             _rect = GUILayout.Window(0x484F41, _rect, Draw, $"{Plugin.Name} {Plugin.Version} — settings apply live, {HoardConfig.ConfigWindowKey.Value.Label()} or Esc closes", _box);
             GUI.FocusWindow(0x484F41);
+            GUI.matrix = saved;
         }
 
         private static void Draw(int id)

@@ -21,15 +21,16 @@ namespace Hoard
         private const float Cell = 70f;
         private const float Pitch = Cell + 10f;
         private static readonly Vector2 EquipOrigin = new Vector2(60.5f, -27f);
+        // Two aligned columns: Head/Chest/Legs left, Shoulders/Utility/Trinket right.
         private static readonly Vector2[] EquipOffsets =
         {
             new Vector2(0f, 0f), new Vector2(0f, -Pitch), new Vector2(0f, -2f * Pitch),
-            new Vector2(Pitch, -0.5f * Pitch), new Vector2(Pitch, -1.5f * Pitch), new Vector2(Pitch, -2.5f * Pitch),
+            new Vector2(Pitch, 0f), new Vector2(Pitch, -Pitch), new Vector2(Pitch, -2f * Pitch),
         };
-        private static readonly Vector2 EquipBkgCenter = new Vector2(132.5f, -159f);
-        private static readonly Vector2 EquipBkgSize = new Vector2(210f, 300f);
+        private static readonly Vector2 EquipBkgCenter = new Vector2(132.5f, -139f);
+        private static readonly Vector2 EquipBkgSize = new Vector2(210f, 260f);
         private static readonly Vector2 EquipLabelPos = new Vector2(32f, 5f);
-        private const float RowLeft = 25.5f, QuickRowTop = -342f, RowBkgLeft = 14.5f, RowBkgHeight = 90f, RowBkgPitch = 74f;
+        private const float RowLeft = 25.5f, QuickRowTop = -302f, RowBkgLeft = 14.5f, RowBkgHeight = 90f, RowBkgPitch = 74f;
 
         private static RectTransform _invBkg, _invDarken, _invFrame, _equipBkg, _quickBkg, _slotRoot, _hiddenRoot;
         private static Image _invBkgImage;

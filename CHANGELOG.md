@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.0 — 2026-09-11
+
+- New: **locked slots**. Ctrl + right-click a slot to lock it (red border). Nothing is
+  pulled out of a locked slot by crafting, building, station fueling, quick stack, sort,
+  store all or trash, and the game doesn't count its contents as available. Items still
+  stack into it, and an empty locked slot is filled only when every other cell is taken.
+  Toggle key and color are configurable.
+- Settings window scales with the game's UI scale (it was drawn in native pixels, tiny
+  on high-DPI screens) and is larger by default; *Config window scale* adds a factor.
+- Equipment slots are an aligned 2x3 grid instead of the staggered paperdoll layout.
+- The Sort / Stack / Restock / Trash buttons sit in a row tucked under the bottom edge of
+  the inventory panel.
+
 ## 0.1.1 — 2026-09-11
 
 - Fix: the plugin did not load at all. The config key `Don't auto-pickup trash` contains

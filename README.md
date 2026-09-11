@@ -34,11 +34,12 @@ Client-side only: the server needs nothing, and other players don't need the mod
 | **Sort** (`O`) | Sorts the inventory, or the open chest, by type/name/weight/value. Favorites stay put. |
 | **Trash** (`Delete` / button) | Destroys the item you're dragging, with confirmation. Quick trash destroys everything trash-flagged. |
 | **Favorites** | **Alt + left-click** an item to favorite it (by name), **Alt + right-click** a slot to favorite the slot. Favorites are never stacked, sorted, stored or trashed. **Alt + Trash button** trash-flags the dragged item instead. |
+| **Locked slots** | **Ctrl + right-click** a slot to lock it (red border). Nothing is ever pulled out of a locked slot: not by crafting, building, station fueling, quick stack, sort, store all or trash, and the game doesn't count its contents as available. Items still stack into it, you can still use or move them by hand, and an empty locked slot is only filled when every other cell is taken. |
 | **Store all / Take all** | *Store all* button on chests (skips favorites, equipped items, hotbar, slots). *Take all* fills your inventory in order and never uses the quick slots. |
 | **Equipment slots** | Dedicated cells for helmet, chest, legs, cape, utility item and trinket, next to the inventory. Drag an unworn helmet onto the Head cell to equip it; drag worn gear onto the grid to unequip. |
 | **Quick slots** | Up to six hotkey cells (`Z`, `V`, `B` by default; slots 4–6 unbound) shown as a second bar next to the hotbar. |
 | **Death** | The tombstone is enlarged to fit everything. On pickup, belts, your armor and the weapon/shield you held are re-equipped. Keeping slot items through death is available but off by default. |
-| **Settings** | **F7** opens the settings window. Every change applies immediately and is saved. Editing the `.cfg` file while playing also applies live. |
+| **Settings** | **F7** opens the settings window (scales with the game's UI scale; extra factor in *Config window scale*). Every change applies immediately and is saved. Editing the `.cfg` file while playing also applies live. |
 
 ## Multiplayer
 

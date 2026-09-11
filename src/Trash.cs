@@ -69,7 +69,7 @@ namespace Hoard
                     Msg.Center("Hotbar items are protected from trashing");
                     return;
                 }
-                if ((inPlayerInv && fav.IsSlotFavorite(item.m_gridPos)) || fav.IsItemFavorite(item.m_shared))
+                if ((inPlayerInv && fav.IsSlotProtected(item.m_gridPos)) || fav.IsItemFavorite(item.m_shared))
                 {
                     Msg.Center("Favorited items can't be trashed");
                     return;
@@ -116,7 +116,7 @@ namespace Hoard
                 var item = inv.m_inventory[i];
                 if (item.m_gridPos.y == 0 && !HoardConfig.TrashCanAffectHotbar.Value) continue;
                 if (Slots.IsSlotCell(item.m_gridPos)) continue;
-                if (fav.IsSlotFavorite(item.m_gridPos) || !fav.IsConsideredTrash(item.m_shared)) continue;
+                if (fav.IsSlotProtected(item.m_gridPos) || !fav.IsConsideredTrash(item.m_shared)) continue;
                 player.RemoveEquipAction(item);
                 player.UnequipItem(item, false);
                 inv.RemoveItem(item);
