@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.1 — 2026-09-11
+
+- Fix: the plugin did not load at all. The config key `Don't auto-pickup trash` contains
+  an apostrophe, which BepInEx forbids in section/key names, so `ConfigFile.Bind` threw
+  inside `Awake` before any patch was applied. Renamed to `Do not auto-pickup trash`.
+  (Reported from the first install on another machine.)
+- The build's static check now also rejects config section/key names with characters
+  BepInEx forbids.
+
 ## 0.1.0 — 2026-09-11
 
 First release. One client-side plugin replacing AzuCraftyBoxes, QuickStackStore and

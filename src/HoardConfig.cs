@@ -183,7 +183,7 @@ namespace Hoard
             QuickTrashConfirm = cfg.Bind(s, "Confirm quick trash", true, "Ask before quick-trashing.");
             TrashCanAffectHotbar = cfg.Bind(s, "Trash can affect hotbar", true, "Allow trashing items that sit in the hotbar row.");
             TrophiesAreTrash = cfg.Bind(s, "Trophies count as trash", false, "Treat all non-favorited trophies as trash-flagged.");
-            NoAutoPickupOfTrash = cfg.Bind(s, "Don't auto-pickup trash", false, "Trash-flagged items are not auto-picked-up.");
+            NoAutoPickupOfTrash = cfg.Bind(s, "Do not auto-pickup trash", false, "Trash-flagged items are not auto-picked-up.");
 
             s = "8 - Favorites";
             FavoriteModifier = cfg.Bind(s, "Favorite modifier", new KeyboardShortcut(KeyCode.LeftAlt), "Hold this and left-click an item to favorite/unfavorite it (by name), right-click a slot to favorite the slot. Favorites are never stacked, sorted, stored or trashed. Hold it and click the trash can with an item to trash-flag the item instead.");

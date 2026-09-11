@@ -87,5 +87,21 @@ foreach (var type in plugin.MainModule.GetTypes())
     }
     Console.WriteLine($"  ok   {declaring.Name}.{methodName}  <- {type.Name}");
 }
+// BepInEx forbids = \n \t \ " ' [ ] in config SECTION and KEY names (not descriptions) and
+// throws from ConfigFile.Bind, which kills the plugin in Awake before any patch is applied.
+// Names are short; descriptions are sentences - the length cut separates them well enough.
+var illegal = new[] { '=', '\n', '\t', '\\', '"', '\'', '[', ']' };
+var cfgType = plugin.MainModule.GetTypes().FirstOrDefault(t => t.Name == "HoardConfig");
+if (cfgType != null)
+{
+    foreach (var m in cfgType.Methods.Where(m => m.HasBody))
+        foreach (var ins in m.Body.Instructions)
+            if (ins.OpCode == Mono.Cecil.Cil.OpCodes.Ldstr && ins.Operand is string lit && lit.Length < 64 && lit.IndexOfAny(illegal) >= 0)
+            {
+                Console.WriteLine($"FAIL config name contains a character BepInEx forbids in section/key names: \"{lit}\"");
+                errors++;
+            }
+}
+
 Console.WriteLine($"\n{checkedPatches} patch targets checked, {dynamicTargets} dynamic skipped, {errors} problem(s)");
 return errors == 0 ? 0 : 1;
