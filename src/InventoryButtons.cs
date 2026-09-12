@@ -87,33 +87,23 @@ namespace Hoard
                 row[i].transform.localPosition = new Vector3(leftEdge + tw * px + i * (tw + gap), _takeAllOrigPos.y - (h + gap), _takeAllOrigPos.z);
             }
 
-            // Inventory panel: a column of small buttons in the right-hand strip, between the
-            // armor and weight readouts. That strip belongs to the inventory panel alone, so
-            // the buttons never collide with an open chest.
-            var armor = gui.m_player.Find("Armor");
-            var weight = gui.m_player.Find("Weight");
+            // Inventory buttons live in Hoard's own slot panel (right of the inventory), in a
+            // row under the quick slots. That is space the mod owns, so it never collides
+            // with the chest panel or the armor/weight readouts. Positioned every frame in
+            // PlaceInventoryButtons because the slot root is created lazily.
             _sortInv = Clone(gui, "HoardSortInventory", gui.m_player, "Sort", () => Sorting.SortPlayer(p()));
             _stackInv = Clone(gui, "HoardStackInventory", gui.m_player, "Stack", () => QuickStack.Run(p()));
             _restockInv = Clone(gui, "HoardRestockInventory", gui.m_player, "Restock", () => Restock.Run(p()));
             _trashInv = Clone(gui, "HoardTrash", gui.m_player, "Trash", () => Trash.OnTrashPressed());
-            Button[] mini = { _sortInv, _stackInv, _restockInv, _trashInv };
-            // Fit the column into the gap between the armor readout (icon above its number)
-            // and the weight readout (icon above its number), whatever the panel's scale.
-            Vector3 armorPos = armor ? armor.localPosition : Vector3.zero;
-            Vector3 weightPos = weight ? weight.localPosition : armorPos + new Vector3(0f, -220f, 0f);
-            float colX = weight ? weightPos.x : armorPos.x;
-            float top = armorPos.y - 50f;      // below the armor number
-            float bottom = weightPos.y + 28f;  // above the weight icon
-            float pitch = Mathf.Max(20f, (top - bottom) / mini.Length);
-            float height = Mathf.Clamp(pitch - 4f, 16f, 30f);
-            for (int i = 0; i < mini.Length; i++)
+            foreach (var b in new[] { _sortInv, _stackInv, _restockInv, _trashInv })
             {
-                var rt = (RectTransform)mini[i].transform;
+                var rt = (RectTransform)b.transform;
+                rt.anchorMin = rt.anchorMax = new Vector2(0f, 1f);
+                rt.pivot = new Vector2(0f, 1f);
                 rt.localScale = Vector3.one;
-                Size(mini[i], 70f, height);
-                rt.localPosition = new Vector3(colX, top - pitch * i - height / 2f, 0f);
-                var t = mini[i].GetComponentInChildren<TMP_Text>();
-                if (t) t.fontSizeMin = 8f;
+                rt.sizeDelta = new Vector2(SlotPanel.ButtonWidth, SlotPanel.ButtonHeight);
+                var t = b.GetComponentInChildren<TMP_Text>();
+                if (t) t.fontSizeMin = 10f;
             }
             var trashText = _trashInv.GetComponentInChildren<TMP_Text>();
             if (trashText) trashText.color = new Color(1f, 0.6f, 0.3f);
@@ -143,6 +133,7 @@ namespace Hoard
             else if (!want && _builtWithButtons) { Destroy(); _builtWithButtons = false; }
             if (!want) return;
 
+            PlaceInventoryButtons();
             bool container = gui.m_currentContainer;
             bool area = !container;
             Set(_sortInv, HoardConfig.SortEnabled.Value);
@@ -157,6 +148,20 @@ namespace Hoard
         }
 
         private static void Set(Button b, bool on) { if (b && b.gameObject.activeSelf != on) b.gameObject.SetActive(on); }
+
+        private static void PlaceInventoryButtons()
+        {
+            var root = SlotPanel.Root;
+            Button[] row = { _sortInv, _stackInv, _restockInv, _trashInv };
+            for (int i = 0; i < row.Length; i++)
+            {
+                var b = row[i];
+                if (!b) continue;
+                var rt = (RectTransform)b.transform;
+                if (root && rt.parent != root) { rt.SetParent(root, false); rt.SetAsLastSibling(); }
+                rt.anchoredPosition = SlotPanel.ButtonPosition(i);
+            }
+        }
 
         [HarmonyPatch(typeof(InventoryGui), nameof(InventoryGui.Update))]
         private static class InventoryGui_Update

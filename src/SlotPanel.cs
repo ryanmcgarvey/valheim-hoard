@@ -32,13 +32,31 @@ namespace Hoard
         private static readonly Vector2 EquipLabelPos = new Vector2(32f, 5f);
         private const float RowLeft = 25.5f, QuickRowTop = -302f, RowBkgLeft = 14.5f, RowBkgHeight = 90f, RowBkgPitch = 74f;
 
-        private static RectTransform _invBkg, _invDarken, _invFrame, _equipBkg, _quickBkg, _slotRoot, _hiddenRoot;
+        private static RectTransform _invBkg, _invDarken, _invFrame, _equipBkg, _quickBkg, _buttonBkg, _slotRoot, _hiddenRoot;
+
+        public static RectTransform Root => _slotRoot;
+        public const float ButtonWidth = 84f, ButtonHeight = 32f, ButtonGap = 6f;
+        public const int ButtonCount = 4;
         private static Image _invBkgImage;
         private static Vector2? _containerPivot;
         private static Color _normal = Color.clear, _highlight = Color.clear;
         private static float _labelSize;
 
         private static int ActiveQuick => HoardConfig.QuickSlots.Value ? HoardConfig.QuickSlotCount.Value : 0;
+
+        // Top edge (grid-root space) of the row of Hoard buttons: under the quick slots, or
+        // under the equipment cells, or right at the panel origin when both are off.
+        public static float ButtonRowTop
+        {
+            get
+            {
+                if (ActiveQuick > 0) return Base.y + QuickRowTop - (Cell - 6f) / 2f - RowBkgHeight / 2f - 8f;
+                if (HoardConfig.EquipmentSlots.Value) return Base.y + EquipBkgCenter.y - EquipBkgSize.y / 2f - 8f;
+                return Base.y - 8f;
+            }
+        }
+
+        public static Vector2 ButtonPosition(int i) => new Vector2(Base.x + RowBkgLeft + 6f + i * (ButtonWidth + ButtonGap), ButtonRowTop - 6f);
 
         public static Vector2 PositionOf(Slots.Slot s)
         {
@@ -63,9 +81,12 @@ namespace Hoard
             ExtendForExtraRows(gui);
             if (!_equipBkg) _equipBkg = CreateBackground("HoardEquipmentBkg");
             if (!_quickBkg) _quickBkg = CreateBackground("HoardQuickBkg");
+            if (!_buttonBkg) _buttonBkg = CreateBackground("HoardButtonsBkg");
             Sync(_equipBkg, HoardConfig.EquipmentSlots.Value, Base + EquipBkgCenter, EquipBkgSize);
             int q = ActiveQuick;
             Sync(_quickBkg, q > 0, Base + new Vector2(RowBkgLeft + (RowBkgPitch * q + 10f) / 2f, QuickRowTop - (Cell - 6f) / 2f), new Vector2(RowBkgPitch * q + 10f, RowBkgHeight));
+            float rowW = ButtonCount * ButtonWidth + (ButtonCount - 1) * ButtonGap + 12f;
+            Sync(_buttonBkg, HoardConfig.ShowButtons.Value, new Vector2(Base.x + RowBkgLeft + rowW / 2f, ButtonRowTop - 6f - ButtonHeight / 2f), new Vector2(rowW, ButtonHeight + 12f));
         }
 
         private static void ExtendForExtraRows(InventoryGui gui)
@@ -258,7 +279,7 @@ namespace Hoard
 
         private static void Clear()
         {
-            _invBkg = _invDarken = _invFrame = _equipBkg = _quickBkg = _slotRoot = _hiddenRoot = null;
+            _invBkg = _invDarken = _invFrame = _equipBkg = _quickBkg = _buttonBkg = _slotRoot = _hiddenRoot = null;
             _invBkgImage = null;
             _containerPivot = null;
             _drag = null;

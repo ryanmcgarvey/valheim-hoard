@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.3 — 2026-09-12
+
+- The Sort/Stack/Restock/Trash buttons moved into Hoard's own panel, in a row under the
+  quick slots (or under the equipment cells), on their own background strip. Full-size
+  labels again; nothing overlaps the armor/weight readouts or the chest panel.
+
 ## 0.6.2 — 2026-09-12
 
 - Fix: row planting kept changing direction. Plants take a random rotation after every
