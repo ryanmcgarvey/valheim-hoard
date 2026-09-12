@@ -82,7 +82,7 @@ namespace Hoard
             }
         }
 
-        private static void Confirm(string header, string text, System.Action yes)
+        internal static void Confirm(string header, string text, System.Action yes)
         {
             if (!UnifiedPopup.IsAvailable())
             {

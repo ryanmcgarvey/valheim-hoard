@@ -11,7 +11,7 @@ namespace Hoard
     // game's own Take All button so they pick up the UI skin.
     public static class InventoryButtons
     {
-        private static Button _sortInv, _stackInv, _restockInv, _trashInv;
+        private static Button _sortInv, _stackInv, _restockInv, _trashInv, _recycleInv;
         private static Button _storeAll, _stackCont, _restockCont, _sortCont;
         private static Vector3 _takeAllOrigPos;
         private static Vector2 _takeAllOrigSize;
@@ -96,7 +96,8 @@ namespace Hoard
             _stackInv = Clone(gui, "HoardStackInventory", gui.m_player, "Stack", () => QuickStack.Run(p()));
             _restockInv = Clone(gui, "HoardRestockInventory", gui.m_player, "Restock", () => Restock.Run(p()));
             _trashInv = Clone(gui, "HoardTrash", gui.m_player, "Trash", () => Trash.OnTrashPressed());
-            Button[] mini = { _sortInv, _stackInv, _restockInv, _trashInv };
+            _recycleInv = Clone(gui, "HoardRecycle", gui.m_player, "Recycle", () => Recycle.OnRecyclePressed());
+            Button[] mini = { _sortInv, _stackInv, _restockInv, _trashInv, _recycleInv };
             Vector3 top = armor ? armor.localPosition : (weight ? weight.localPosition + new Vector3(0f, 300f, 0f) : Vector3.zero);
             float colX = weight ? weight.localPosition.x : top.x;
             for (int i = 0; i < mini.Length; i++)
@@ -114,9 +115,9 @@ namespace Hoard
 
         private static void Destroy()
         {
-            foreach (var b in new[] { _sortInv, _stackInv, _restockInv, _trashInv, _storeAll, _stackCont, _restockCont, _sortCont })
+            foreach (var b in new[] { _sortInv, _stackInv, _restockInv, _trashInv, _recycleInv, _storeAll, _stackCont, _restockCont, _sortCont })
                 if (b) Object.Destroy(b.gameObject);
-            _sortInv = _stackInv = _restockInv = _trashInv = _storeAll = _stackCont = _restockCont = _sortCont = null;
+            _sortInv = _stackInv = _restockInv = _trashInv = _recycleInv = _storeAll = _stackCont = _restockCont = _sortCont = null;
             if (_takeAllMeasured && InventoryGui.instance && InventoryGui.instance.m_takeAllButton)
             {
                 var rt = (RectTransform)InventoryGui.instance.m_takeAllButton.transform;
@@ -142,6 +143,7 @@ namespace Hoard
             Set(_stackInv, HoardConfig.QuickStackEnabled.Value && (area || !HoardConfig.QuickStackOnlyToOpenContainer.Value));
             Set(_restockInv, HoardConfig.RestockEnabled.Value && (area || !HoardConfig.RestockOnlyFromOpenContainer.Value));
             Set(_trashInv, HoardConfig.TrashEnabled.Value);
+            Set(_recycleInv, HoardConfig.RecycleEnabled.Value);
             Set(_storeAll, container && HoardConfig.StoreAllButton.Value);
             Set(_stackCont, container && HoardConfig.QuickStackEnabled.Value);
             Set(_restockCont, container && HoardConfig.RestockEnabled.Value);
@@ -166,7 +168,7 @@ namespace Hoard
         {
             private static void Postfix()
             {
-                _sortInv = _stackInv = _restockInv = _trashInv = _storeAll = _stackCont = _restockCont = _sortCont = null;
+                _sortInv = _stackInv = _restockInv = _trashInv = _recycleInv = _storeAll = _stackCont = _restockCont = _sortCont = null;
                 _takeAllMeasured = false;
                 _builtWithButtons = false;
             }

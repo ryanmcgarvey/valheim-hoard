@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0 — 2026-09-12
+
+- New: **Recycle** button in the inventory (section *15 - Recycling*). Drag an item onto
+  it to get back the materials its recipe and upgrades cost. Anything the game won't let
+  through a portal (metals, ores, other non-teleportable items) is forfeited, never
+  returned, so recycling is not a way around hauling metal. Confirmation shows both lists.
+
 ## 0.5.0 — 2026-09-12
 
 - Running on a made surface (any surface with a speed bonus) drains 50% stamina by

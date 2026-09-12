@@ -24,6 +24,7 @@ namespace Hoard
                     if (HoardConfig.TrashKey.Value.IsDown()) { Trash.OnTrashPressed(fromHotkey: true); return; }
                 }
                 if (HoardConfig.StoreAllKey.Value.IsDown()) { StoreTakeAll.StoreAll(__instance); return; }
+                if (HoardConfig.RecycleEnabled.Value && HoardConfig.RecycleKey.Value.IsDown()) { Recycle.OnRecyclePressed(); return; }
             }
         }
     }

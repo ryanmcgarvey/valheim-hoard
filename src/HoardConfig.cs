@@ -121,6 +121,12 @@ namespace Hoard
         public static ConfigEntry<int> RowMaxLength, RowMaxRows;
         public static ConfigEntry<float> RowSpacing;
 
+        // ---- Recycling
+        public static ConfigEntry<bool> RecycleEnabled, RecycleConfirm, RecycleConsumables;
+        public static ConfigEntry<float> RecycleRate;
+        public static ConfigEntry<string> RecycleNeverReturn;
+        public static ConfigEntry<KeyboardShortcut> RecycleKey;
+
         public enum SortCriteria { Type, Name, Weight, Value, InternalName }
         public enum AutoSort { Never, Inventory, Container, Both }
 
@@ -253,6 +259,14 @@ namespace Hoard
             RowMaxLength = cfg.Bind(s, "Max row length", 30, new ConfigDescription("Upper limit for a row.", new AcceptableValueRange<int>(2, 100)));
             RowMaxRows = cfg.Bind(s, "Max rows", 10, new ConfigDescription("Upper limit for rows deep.", new AcceptableValueRange<int>(1, 30)));
             RowSpacing = cfg.Bind(s, "Spacing", 1f, new ConfigDescription("Distance between plants as a multiple of the minimum the plant needs to grow. 1 = as tight as they'll grow.", new AcceptableValueRange<float>(0.8f, 3f)));
+
+            s = "15 - Recycling";
+            RecycleEnabled = cfg.Bind(s, "Enabled", true, "A Recycle button in the inventory: drag an item onto it to get its crafting materials back. Materials that can't go through a portal (metals, ores) are never returned, so recycling can't be used to move metal past a portal.");
+            RecycleRate = cfg.Bind(s, "Return rate %", 100f, new ConfigDescription("Share of the invested materials (base recipe plus every upgrade level) that comes back, rounded down.", new AcceptableValueRange<float>(0f, 100f)));
+            RecycleConsumables = cfg.Bind(s, "Recycle food and mead", false, "Allow recycling consumables back into their ingredients.");
+            RecycleConfirm = cfg.Bind(s, "Confirm", true, "Show what you'll get back (and what is forfeited) before recycling.");
+            RecycleNeverReturn = cfg.Bind(s, "Never return", "", "Comma-separated item names (prefab or $item_ names) that are forfeited on top of the non-portable ones.");
+            RecycleKey = cfg.Bind(s, "Key", KeyboardShortcut.Empty, "Recycle the item being dragged (inventory open).");
 
             // Live hooks: the slot region depends on these.
             EquipmentSlots.SettingChanged += (_, __) => Slots.OnSlotActivationChanged();
