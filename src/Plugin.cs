@@ -14,7 +14,7 @@ namespace Hoard
     {
         public const string Guid = "com.ryan.hoard";
         public const string Name = "Hoard";
-        public const string Version = "0.4.0";
+        public const string Version = "0.5.0";
 
         private Harmony _harmony;
         private FileSystemWatcher _watcher;
@@ -82,7 +82,11 @@ namespace Hoard
             }
 
             ConfigWindow.PollToggle();
-            if (!ConfigWindow.Visible) Slots.HandleHotkeys();
+            if (!ConfigWindow.Visible)
+            {
+                Slots.HandleHotkeys();
+                if (Player.m_localPlayer && !GameState.IgnoreKeysInPlaceMode()) RowPlanting.HandleInput(Player.m_localPlayer);
+            }
         }
 
         private void LateUpdate() => SlotValidation.Run();

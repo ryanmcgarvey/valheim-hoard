@@ -44,7 +44,8 @@ Client-side only: the server needs nothing, and other players don't need the mod
 | **Equipment slots** | Dedicated cells for helmet, chest, legs, cape, utility item and trinket, next to the inventory. Drag an unworn helmet onto the Head cell to equip it; drag worn gear onto the grid to unequip. |
 | **Quick slots** | Up to six hotkey cells (`Z`, `V`, `B` by default; slots 4–6 unbound) shown as a second bar next to the hotbar. |
 | **Death** | The tombstone is enlarged to fit everything. On pickup, belts, your armor and the weapon/shield you held are re-equipped. Keeping slot items through death is available but off by default. |
-| **Surface run speed** | Run faster on made surfaces: dirt paths +50%, paved paths +70%, wood floors +60%, stone floors +70% by default (cultivated soil and iron grates configurable too). Applies while running only. |
+| **Surface run speed** | Run faster on made surfaces: dirt paths +50%, paved paths +70%, wood floors +60%, stone floors +70% by default (cultivated soil and iron grates configurable too), and running there drains half the stamina. Applies while running only. |
+| **Row planting** | With the cultivator, plant a row or a block in one click. **Alt + scroll** sets the row length, **Alt + Shift + scroll** the number of rows, **N** toggles fill mode (the row runs until the ground stops being plantable, something is in the way, or the seeds run out). Extra ghosts preview it; red ones are skipped. Seeds in nearby chests count when craft-from-containers is on. |
 | **Settings** | **F7** opens the settings window (scales with the game's UI scale; extra factor in *Config window scale*). Every change applies immediately and is saved. Editing the `.cfg` file while playing also applies live. |
 
 ## Multiplayer

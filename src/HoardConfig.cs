@@ -113,6 +113,13 @@ namespace Hoard
         // ---- Surface run speed
         public static ConfigEntry<bool> SurfaceSpeedEnabled;
         public static ConfigEntry<float> SpeedDirtPath, SpeedPavedPath, SpeedCultivated, SpeedWood, SpeedStone, SpeedMetal;
+        public static ConfigEntry<float> SpeedStaminaPercent;
+
+        // ---- Row planting
+        public static ConfigEntry<bool> RowPlantingEnabled;
+        public static ConfigEntry<KeyboardShortcut> RowModifier, RowsModifier, RowFillKey;
+        public static ConfigEntry<int> RowMaxLength, RowMaxRows;
+        public static ConfigEntry<float> RowSpacing;
 
         public enum SortCriteria { Type, Name, Weight, Value, InternalName }
         public enum AutoSort { Never, Inventory, Container, Both }
@@ -236,6 +243,16 @@ namespace Hoard
             SpeedWood = cfg.Bind(s, "Wood floor %", 60f, new ConfigDescription("Extra run speed on wood and core-wood pieces (floors, bridges, docks).", new AcceptableValueRange<float>(0f, 300f)));
             SpeedStone = cfg.Bind(s, "Stone floor %", 70f, new ConfigDescription("Extra run speed on stone, marble and black-marble pieces.", new AcceptableValueRange<float>(0f, 300f)));
             SpeedMetal = cfg.Bind(s, "Metal floor %", 60f, new ConfigDescription("Extra run speed on iron pieces (iron grates).", new AcceptableValueRange<float>(0f, 300f)));
+            SpeedStaminaPercent = cfg.Bind(s, "Run stamina on made surfaces %", 50f, new ConfigDescription("Running stamina drain per second on any surface that has a speed bonus, as a percentage of normal. 100 = unchanged.", new AcceptableValueRange<float>(0f, 200f)));
+
+            s = "14 - Row planting";
+            RowPlantingEnabled = cfg.Bind(s, "Enabled", true, "With the cultivator, plant a row or a block of rows in one click. Extra ghosts preview the placement; red ones are skipped.");
+            RowModifier = cfg.Bind(s, "Row length modifier", new KeyboardShortcut(KeyCode.LeftAlt), "Hold and scroll while placing a plant to change how many plants long the row is (the scroll doesn't rotate the piece while held). Alt is unused by the game in build mode; Shift toggles snapping and Ctrl crouches, which is why they aren't the defaults.");
+            RowsModifier = cfg.Bind(s, "Row count modifier", new KeyboardShortcut(KeyCode.LeftAlt, KeyCode.LeftShift), "Hold and scroll while placing a plant to change how many rows deep the block is.");
+            RowFillKey = cfg.Bind(s, "Fill key", new KeyboardShortcut(KeyCode.N), "Toggle fill mode: the row runs as far as it can - until the ground stops being plantable, something is in the way, or you run out of seeds.");
+            RowMaxLength = cfg.Bind(s, "Max row length", 30, new ConfigDescription("Upper limit for a row.", new AcceptableValueRange<int>(2, 100)));
+            RowMaxRows = cfg.Bind(s, "Max rows", 10, new ConfigDescription("Upper limit for rows deep.", new AcceptableValueRange<int>(1, 30)));
+            RowSpacing = cfg.Bind(s, "Spacing", 1f, new ConfigDescription("Distance between plants as a multiple of the minimum the plant needs to grow. 1 = as tight as they'll grow.", new AcceptableValueRange<float>(0.8f, 3f)));
 
             // Live hooks: the slot region depends on these.
             EquipmentSlots.SettingChanged += (_, __) => Slots.OnSlotActivationChanged();

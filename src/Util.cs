@@ -63,6 +63,17 @@ namespace Hoard
             return false;
         }
 
+        // Like IgnoreKeys but allowing build/place mode (row planting keys live there).
+        public static bool IgnoreKeysInPlaceMode()
+        {
+            var p = Player.m_localPlayer;
+            if (!p || p.InCutscene() || p.IsTeleporting() || p.IsDead()) return true;
+            if (!ZNetScene.instance) return true;
+            if (Minimap.IsOpen() || Menu.IsVisible() || Console.IsVisible() || StoreGui.IsVisible() || TextInput.IsVisible() || InventoryGui.IsVisible()) return true;
+            if (Chat.instance && Chat.instance.HasFocus()) return true;
+            return false;
+        }
+
         public static bool IsTrueSingleplayer()
             => !ZNet.m_openServer && !ZNet.m_publicServer && ZNet.instance && ZNet.instance.IsServer() && !ZNet.instance.IsDedicated() && ZNet.instance.GetConnectedPeers().Count == 0;
     }

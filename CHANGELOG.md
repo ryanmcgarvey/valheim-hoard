@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0 — 2026-09-12
+
+- Running on a made surface (any surface with a speed bonus) drains 50% stamina by
+  default; *Run stamina on made surfaces %* in section 13.
+- New: **row planting** with the cultivator (section *14 - Row planting*). Alt + scroll
+  sets row length, Alt + Shift + scroll sets rows, N toggles fill mode. Extra ghosts
+  preview the placement, invalid or unaffordable spots are red and skipped; each extra
+  plant is paid for (chests count when craft-from-containers is on).
+
 ## 0.4.0 — 2026-09-12
 
 - New: **surface run speed**. Running is faster on made surfaces: dirt paths +50%, paved

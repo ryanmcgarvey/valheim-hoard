@@ -83,6 +83,21 @@ namespace Hoard
             return Current;
         }
 
+        // Running on a made surface also costs less stamina per second (one factor for all
+        // surfaces that have a speed bonus), so a road is cheaper per metre, not just faster.
+        [HarmonyPatch(typeof(SEMan), nameof(SEMan.ModifyRunStaminaDrain))]
+        private static class SEMan_ModifyRunStaminaDrain
+        {
+            private static void Postfix(SEMan __instance, ref float drain)
+            {
+                if (!HoardConfig.SurfaceSpeedEnabled.Value) return;
+                var p = Player.m_localPlayer;
+                if (!p || __instance.m_character != p) return;
+                if (BonusPercent(CurrentFor(p)) <= 0f) return;
+                drain *= Mathf.Clamp(HoardConfig.SpeedStaminaPercent.Value, 0f, 200f) / 100f;
+            }
+        }
+
         [HarmonyPatch(typeof(Player), nameof(Player.GetRunSpeedFactor))]
         private static class Player_GetRunSpeedFactor
         {
