@@ -110,6 +110,10 @@ namespace Hoard
         public static ConfigEntry<bool> ReequipBeltOnPickup;
         public static ConfigEntry<bool> ReequipWeaponsOnPickup;
 
+        // ---- Surface run speed
+        public static ConfigEntry<bool> SurfaceSpeedEnabled;
+        public static ConfigEntry<float> SpeedDirtPath, SpeedPavedPath, SpeedCultivated, SpeedWood, SpeedStone, SpeedMetal;
+
         public enum SortCriteria { Type, Name, Weight, Value, InternalName }
         public enum AutoSort { Never, Inventory, Container, Both }
 
@@ -223,6 +227,15 @@ namespace Hoard
             ReequipArmorOnPickup = cfg.Bind(s, "Re-equip armor on pickup", true, "Picking up your tombstone re-equips the armor that was in your equipment slots.");
             ReequipBeltOnPickup = cfg.Bind(s, "Re-equip carry-weight items on pickup", true, "Belts (Megingjord) from the tombstone are equipped first so the loot stays carryable.");
             ReequipWeaponsOnPickup = cfg.Bind(s, "Re-equip weapon and shield on pickup", true, "The weapon and shield you died holding are re-equipped on pickup.");
+
+            s = "13 - Surface run speed";
+            SurfaceSpeedEnabled = cfg.Bind(s, "Enabled", true, "Run faster on made surfaces. The bonus multiplies your run speed (after skill and equipment) while running; walking, sneaking and swimming are unaffected.");
+            SpeedDirtPath = cfg.Bind(s, "Dirt path %", 50f, new ConfigDescription("Extra run speed on terrain flattened/pathed with the hoe.", new AcceptableValueRange<float>(0f, 300f)));
+            SpeedPavedPath = cfg.Bind(s, "Paved path %", 70f, new ConfigDescription("Extra run speed on paved (stone) paths made with the hoe.", new AcceptableValueRange<float>(0f, 300f)));
+            SpeedCultivated = cfg.Bind(s, "Cultivated soil %", 0f, new ConfigDescription("Extra run speed on cultivated ground.", new AcceptableValueRange<float>(0f, 300f)));
+            SpeedWood = cfg.Bind(s, "Wood floor %", 60f, new ConfigDescription("Extra run speed on wood and core-wood pieces (floors, bridges, docks).", new AcceptableValueRange<float>(0f, 300f)));
+            SpeedStone = cfg.Bind(s, "Stone floor %", 70f, new ConfigDescription("Extra run speed on stone, marble and black-marble pieces.", new AcceptableValueRange<float>(0f, 300f)));
+            SpeedMetal = cfg.Bind(s, "Metal floor %", 60f, new ConfigDescription("Extra run speed on iron pieces (iron grates).", new AcceptableValueRange<float>(0f, 300f)));
 
             // Live hooks: the slot region depends on these.
             EquipmentSlots.SettingChanged += (_, __) => Slots.OnSlotActivationChanged();

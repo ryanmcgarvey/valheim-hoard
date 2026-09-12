@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0 — 2026-09-12
+
+- New: **surface run speed**. Running is faster on made surfaces: dirt paths +50%, paved
+  paths +70%, wood floors +60%, stone floors +70% by default; cultivated soil and iron
+  grates have their own (default 0% and 60%). Section *13 - Surface run speed*.
+
 ## 0.3.0 — 2026-09-11
 
 - Favorites are gone; locked slots are the one mechanism. Ctrl + right-click a slot to

@@ -1,7 +1,7 @@
 # Hoard
 
 One client-side Valheim mod for the inventory chores: **craft from chests**, **quick
-stack / restock / sort / trash / locked slots**, **equipment and quick slots**, and a live
+stack / restock / sort / trash / locked slots**, **equipment and quick slots**, faster running on paths and floors, and a live
 in-game settings window on **F7**. No dependencies beyond BepInEx. Built for Valheim 1.0.
 
 It replaces three mods that used to do this separately (AzuCraftyBoxes, Quick Stack
@@ -44,6 +44,7 @@ Client-side only: the server needs nothing, and other players don't need the mod
 | **Equipment slots** | Dedicated cells for helmet, chest, legs, cape, utility item and trinket, next to the inventory. Drag an unworn helmet onto the Head cell to equip it; drag worn gear onto the grid to unequip. |
 | **Quick slots** | Up to six hotkey cells (`Z`, `V`, `B` by default; slots 4–6 unbound) shown as a second bar next to the hotbar. |
 | **Death** | The tombstone is enlarged to fit everything. On pickup, belts, your armor and the weapon/shield you held are re-equipped. Keeping slot items through death is available but off by default. |
+| **Surface run speed** | Run faster on made surfaces: dirt paths +50%, paved paths +70%, wood floors +60%, stone floors +70% by default (cultivated soil and iron grates configurable too). Applies while running only. |
 | **Settings** | **F7** opens the settings window (scales with the game's UI scale; extra factor in *Config window scale*). Every change applies immediately and is saved. Editing the `.cfg` file while playing also applies live. |
 
 ## Multiplayer
