@@ -11,7 +11,7 @@ namespace Hoard
     // game's own Take All button so they pick up the UI skin.
     public static class InventoryButtons
     {
-        private static Button _sortInv, _stackInv, _restockInv, _trashInv, _recycleInv;
+        private static Button _sortInv, _stackInv, _restockInv, _trashInv;
         private static Button _storeAll, _stackCont, _restockCont, _sortCont;
         private static Vector3 _takeAllOrigPos;
         private static Vector2 _takeAllOrigSize;
@@ -96,16 +96,22 @@ namespace Hoard
             _stackInv = Clone(gui, "HoardStackInventory", gui.m_player, "Stack", () => QuickStack.Run(p()));
             _restockInv = Clone(gui, "HoardRestockInventory", gui.m_player, "Restock", () => Restock.Run(p()));
             _trashInv = Clone(gui, "HoardTrash", gui.m_player, "Trash", () => Trash.OnTrashPressed());
-            _recycleInv = Clone(gui, "HoardRecycle", gui.m_player, "Recycle", () => Recycle.OnRecyclePressed());
-            Button[] mini = { _sortInv, _stackInv, _restockInv, _trashInv, _recycleInv };
-            Vector3 top = armor ? armor.localPosition : (weight ? weight.localPosition + new Vector3(0f, 300f, 0f) : Vector3.zero);
-            float colX = weight ? weight.localPosition.x : top.x;
+            Button[] mini = { _sortInv, _stackInv, _restockInv, _trashInv };
+            // Fit the column into the gap between the armor readout (icon above its number)
+            // and the weight readout (icon above its number), whatever the panel's scale.
+            Vector3 armorPos = armor ? armor.localPosition : Vector3.zero;
+            Vector3 weightPos = weight ? weight.localPosition : armorPos + new Vector3(0f, -220f, 0f);
+            float colX = weight ? weightPos.x : armorPos.x;
+            float top = armorPos.y - 50f;      // below the armor number
+            float bottom = weightPos.y + 28f;  // above the weight icon
+            float pitch = Mathf.Max(20f, (top - bottom) / mini.Length);
+            float height = Mathf.Clamp(pitch - 4f, 16f, 30f);
             for (int i = 0; i < mini.Length; i++)
             {
                 var rt = (RectTransform)mini[i].transform;
                 rt.localScale = Vector3.one;
-                Size(mini[i], 84f, 32f);
-                rt.localPosition = new Vector3(colX, top.y - 60f - i * 38f, 0f);
+                Size(mini[i], 70f, height);
+                rt.localPosition = new Vector3(colX, top - pitch * i - height / 2f, 0f);
                 var t = mini[i].GetComponentInChildren<TMP_Text>();
                 if (t) t.fontSizeMin = 8f;
             }
@@ -115,9 +121,9 @@ namespace Hoard
 
         private static void Destroy()
         {
-            foreach (var b in new[] { _sortInv, _stackInv, _restockInv, _trashInv, _recycleInv, _storeAll, _stackCont, _restockCont, _sortCont })
+            foreach (var b in new[] { _sortInv, _stackInv, _restockInv, _trashInv, _storeAll, _stackCont, _restockCont, _sortCont })
                 if (b) Object.Destroy(b.gameObject);
-            _sortInv = _stackInv = _restockInv = _trashInv = _recycleInv = _storeAll = _stackCont = _restockCont = _sortCont = null;
+            _sortInv = _stackInv = _restockInv = _trashInv = _storeAll = _stackCont = _restockCont = _sortCont = null;
             if (_takeAllMeasured && InventoryGui.instance && InventoryGui.instance.m_takeAllButton)
             {
                 var rt = (RectTransform)InventoryGui.instance.m_takeAllButton.transform;
@@ -143,7 +149,6 @@ namespace Hoard
             Set(_stackInv, HoardConfig.QuickStackEnabled.Value && (area || !HoardConfig.QuickStackOnlyToOpenContainer.Value));
             Set(_restockInv, HoardConfig.RestockEnabled.Value && (area || !HoardConfig.RestockOnlyFromOpenContainer.Value));
             Set(_trashInv, HoardConfig.TrashEnabled.Value);
-            Set(_recycleInv, HoardConfig.RecycleEnabled.Value);
             Set(_storeAll, container && HoardConfig.StoreAllButton.Value);
             Set(_stackCont, container && HoardConfig.QuickStackEnabled.Value);
             Set(_restockCont, container && HoardConfig.RestockEnabled.Value);
@@ -168,7 +173,7 @@ namespace Hoard
         {
             private static void Postfix()
             {
-                _sortInv = _stackInv = _restockInv = _trashInv = _recycleInv = _storeAll = _stackCont = _restockCont = _sortCont = null;
+                _sortInv = _stackInv = _restockInv = _trashInv = _storeAll = _stackCont = _restockCont = _sortCont = null;
                 _takeAllMeasured = false;
                 _builtWithButtons = false;
             }

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.1 — 2026-09-12
+
+- Recycling moved from an inventory button to a **Recycle tab** on the crafting panel,
+  available only while standing at a crafting station. Drop items onto the tab's panel.
+- The inventory's Sort/Stack/Restock/Trash column now fits between the armor and weight
+  readouts instead of covering the weight.
+
 ## 0.6.0 — 2026-09-12
 
 - New: **Recycle** button in the inventory (section *15 - Recycling*). Drag an item onto

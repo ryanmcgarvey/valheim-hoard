@@ -1,6 +1,6 @@
 {
   "name": "Hoard",
-  "version_number": "0.6.0",
+  "version_number": "0.6.1",
   "website_url": "https://github.com/ryanmcgarvey/valheim-hoard",
   "description": "Craft from chests, quick stack/restock/sort/trash/favorites, equipment + quick slots, live F7 config. One client-side mod, no dependencies.",
   "dependencies": ["denikson-BepInExPack_Valheim-5.4.2350"]

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Hoard
 {
-    // Recycle: drag an item onto the Recycle button to break it back into the materials
+    // Recycle: at a crafting station, drag an item onto the Recycle tab to break it back into the materials
     // its recipe (and every upgrade level it has) cost. Only materials the game lets
     // through a portal are returned: metals, ores and anything else flagged
     // non-teleportable are silently forfeited. That closes the "craft axes, portal home,
@@ -20,6 +20,7 @@ namespace Hoard
         public static void OnRecyclePressed()
         {
             if (!Enabled || _pending || !InventoryGui.instance || !InventoryGui.instance.m_dragGo) return;
+            if (!Player.m_localPlayer || !Player.m_localPlayer.GetCurrentCraftingStation()) { Msg.Center("Recycling needs a crafting station"); return; }
             _pending = true;
         }
 
@@ -88,6 +89,7 @@ namespace Hoard
                 int amount = __instance.m_dragAmount;
                 if (!player || item == null || inv == null || !inv.ContainsItem(item)) return;
                 if (inv != player.m_inventory) { Msg.Center("Move it to your inventory first"); return; }
+                if (!player.GetCurrentCraftingStation()) { Msg.Center("Recycling needs a crafting station"); return; }
 
                 var plan = Compute(item, amount, out string reason);
                 if (plan == null) { Msg.Center(reason); return; }
@@ -109,7 +111,7 @@ namespace Hoard
         private static void Execute(InventoryGui gui, Player player, ItemDrop.ItemData item, int amount, Plan plan)
         {
             var inv = player.m_inventory;
-            if (!inv.ContainsItem(item)) return;
+            if (!inv.ContainsItem(item) || !player.GetCurrentCraftingStation()) return;
             if (amount >= item.m_stack)
             {
                 player.RemoveEquipAction(item);
