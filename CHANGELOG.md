@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.2 — 2026-09-12
+
+- Fix: row planting kept changing direction. Plants take a random rotation after every
+  placement, which spun the row axis; the rotation you set is now kept (*Keep rotation*
+  in section 14).
+
 ## 0.6.1 — 2026-09-12
 
 - Recycling moved from an inventory button to a **Recycle tab** on the crafting panel,

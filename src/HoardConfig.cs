@@ -120,6 +120,7 @@ namespace Hoard
         public static ConfigEntry<KeyboardShortcut> RowModifier, RowsModifier, RowFillKey;
         public static ConfigEntry<int> RowMaxLength, RowMaxRows;
         public static ConfigEntry<float> RowSpacing;
+        public static ConfigEntry<bool> RowKeepRotation;
 
         // ---- Recycling
         public static ConfigEntry<bool> RecycleEnabled, RecycleConfirm, RecycleConsumables;
@@ -258,6 +259,7 @@ namespace Hoard
             RowFillKey = cfg.Bind(s, "Fill key", new KeyboardShortcut(KeyCode.N), "Toggle fill mode: the row runs as far as it can - until the ground stops being plantable, something is in the way, or you run out of seeds.");
             RowMaxLength = cfg.Bind(s, "Max row length", 30, new ConfigDescription("Upper limit for a row.", new AcceptableValueRange<int>(2, 100)));
             RowMaxRows = cfg.Bind(s, "Max rows", 10, new ConfigDescription("Upper limit for rows deep.", new AcceptableValueRange<int>(1, 30)));
+            RowKeepRotation = cfg.Bind(s, "Keep rotation", true, "Plants normally get a random rotation after each placement, which also spins the row direction. Keep the rotation you set instead.");
             RowSpacing = cfg.Bind(s, "Spacing", 1f, new ConfigDescription("Distance between plants as a multiple of the minimum the plant needs to grow. 1 = as tight as they'll grow.", new AcceptableValueRange<float>(0.8f, 3f)));
 
             s = "15 - Recycling";

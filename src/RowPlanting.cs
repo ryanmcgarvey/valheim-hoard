@@ -199,9 +199,21 @@ namespace Hoard
         [HarmonyPatch(typeof(Player), nameof(Player.TryPlacePiece))]
         private static class Player_TryPlacePiece
         {
-            private static void Postfix(Player __instance, Piece piece, bool __result)
+            // Plants have m_randomInitBuildRotation, so every PlacePiece re-rolls the ghost
+            // rotation - and with it the direction the row points. Keep the rotation the
+            // player set for as long as a plant is selected.
+            private static void Prefix(Player __instance, ref int __state) => __state = __instance.m_placeRotation;
+
+            private static void Postfix(Player __instance, Piece piece, bool __result, int __state)
             {
-                if (!__result || __instance != Player.m_localPlayer || !Active(__instance) || _positions.Count == 0) return;
+                if (__instance != Player.m_localPlayer || !Active(__instance)) return;
+                try { PlaceExtras(__instance, piece, __result); }
+                finally { if (HoardConfig.RowKeepRotation.Value) __instance.m_placeRotation = __state; }
+            }
+
+            private static void PlaceExtras(Player __instance, Piece piece, bool placedPrimary)
+            {
+                if (!placedPrimary || _positions.Count == 0) return;
                 bool free = __instance.m_noPlacementCost || ZoneSystem.instance.GetGlobalKey(piece.FreeBuildKey());
                 var rot = __instance.m_placementGhost.transform.rotation;
                 int placed = 0;
