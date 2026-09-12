@@ -22,10 +22,13 @@ You need [BepInExPack for Valheim](https://thunderstore.io/c/valheim/p/denikson/
 `C:\Program Files (x86)\Steam\steamapps\common\Valheim`. Start the game once; the
 config file appears at `BepInEx/config/com.ryan.hoard.cfg`.
 
-**macOS with Macheim:** Macheim has no local-mod import; install by hand as above and it
-adopts the DLL as an "unmanaged" mod. It shows such mods as version 0.0.0 forever, so
-check `BepInEx/LogOutput.log` for `Loading [Hoard x.y.z]` to confirm which version is
-actually running. Clear the quarantine flag after copying:
+**macOS:** modded Valheim runs under Rosetta on Apple Silicon. The game itself is a
+universal binary, but BepInEx's pack ships only an x86_64 doorstop and its launch script
+only knows x64/x86, so a native arm64 launch loads no mods at all, silently. Launch the
+game with `arch -x86_64` (Macheim does this for you). Macheim has no local-mod import;
+install by hand as above and it adopts the DLL as an "unmanaged" mod, shown as version
+0.0.0 forever, so check `BepInEx/LogOutput.log` for `Loading [Hoard x.y.z]` to confirm
+which version is running. Clear the quarantine flag after copying:
 `xattr -d com.apple.quarantine .../BepInEx/plugins/Hoard/Hoard.dll`.
 
 Client-side only: the server needs nothing, and other players don't need the mod.
