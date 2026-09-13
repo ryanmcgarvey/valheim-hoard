@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.5 — 2026-09-12
+
+- Fix: the row-planting preview threw an exception every frame (the extra ghosts were
+  plain copies of the placement ghost, whose Plant script expects a live network view).
+  Copies are now visual-only. Exceptions in the preview are caught and logged instead of
+  escaping into the game's frame loop.
+- build.sh installs atomically and refuses to install while Valheim is running.
+  Overwriting Hoard.pdb in place under a live game made Mono abort on the next stack
+  trace.
+
 ## 0.6.4 — 2026-09-12
 
 - Fix: row planting placed only one or two extra plants. Paying for a plant changes the

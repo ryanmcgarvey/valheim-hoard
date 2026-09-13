@@ -42,9 +42,21 @@ echo "== patch check (do the Harmony targets still exist in this game build?)"
 "$DOTNET" tools/PatchCheck/bin/Release/net10.0/PatchCheck.dll bin/Release/Hoard.dll "$GAME/valheim_Data/Managed" "$GAME/BepInEx/core" | grep -vE '^  ok'
 
 if [[ $install == 1 ]]; then
+  # Never overwrite the plugin under a running game: Mono keeps Hoard.pdb mmap'd, and
+  # rewriting it in place while the old IL is loaded makes the next stack-trace lookup
+  # read a mismatched blob heap and abort the game (seen 2026-09-12). BepInEx has no
+  # hot reload anyway; a restart is needed to pick up new code.
+  if pgrep -x valheim.x86_64 >/dev/null && [[ "${FORCE:-0}" != 1 ]]; then
+    echo "Valheim is running - quit the game first (or FORCE=1 to stage the files atomically for the next launch)" >&2
+    exit 1
+  fi
   echo "== install -> $PLUGIN_DIR"
   mkdir -p "$PLUGIN_DIR"
-  cp bin/Release/Hoard.dll bin/Release/Hoard.pdb "$PLUGIN_DIR/"
+  # Atomic: write new inodes, then rename over. A running process keeps its old mappings.
+  cp bin/Release/Hoard.dll "$PLUGIN_DIR/.Hoard.dll.new"
+  cp bin/Release/Hoard.pdb "$PLUGIN_DIR/.Hoard.pdb.new"
+  mv -f "$PLUGIN_DIR/.Hoard.dll.new" "$PLUGIN_DIR/Hoard.dll"
+  mv -f "$PLUGIN_DIR/.Hoard.pdb.new" "$PLUGIN_DIR/Hoard.pdb"
   ls -la "$PLUGIN_DIR"
   echo
   echo "Launch the game, then: valheim-mods verify   (and check ~/.config/unity3d/IronGate/Valheim/Player.log for Hoard errors)"

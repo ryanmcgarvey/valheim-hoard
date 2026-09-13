@@ -92,15 +92,48 @@ namespace Hoard
             _source = null;
         }
 
+        // A visual-only copy of the placement ghost. The ghost still carries the prefab's
+        // scripts (Plant, Piece, ...) whose Awake expects a live ZNetView and throws on a
+        // clone, so the copy is made inactive, stripped of every script, then activated.
         private static GameObject Ghost(int i, GameObject source)
         {
             while (_ghosts.Count <= i)
             {
-                var g = Object.Instantiate(source, source.transform.parent);
+                bool wasActive = source.activeSelf;
+                source.SetActive(false);
+                GameObject g;
+                try
+                {
+                    ZNetView.m_forceDisableInit = true;
+                    g = Object.Instantiate(source, source.transform.parent);
+                }
+                finally
+                {
+                    ZNetView.m_forceDisableInit = false;
+                    source.SetActive(wasActive);
+                }
                 g.name = source.name + "_hoard_row";
+                foreach (var mb in g.GetComponentsInChildren<MonoBehaviour>(true)) Object.DestroyImmediate(mb);
+                foreach (var col in g.GetComponentsInChildren<Collider>(true)) Object.DestroyImmediate(col);
+                g.SetActive(true);
                 _ghosts.Add(g);
             }
             return _ghosts[i];
+        }
+
+        private static void Tint(GameObject g, bool invalid)
+        {
+            if (!MaterialMan.instance) return;
+            if (invalid)
+            {
+                MaterialMan.instance.SetValue(g, ShaderProps._Color, Color.red);
+                MaterialMan.instance.SetValue(g, ShaderProps._EmissionColor, Color.red * 0.7f);
+            }
+            else
+            {
+                MaterialMan.instance.ResetValue(g, ShaderProps._Color);
+                MaterialMan.instance.ResetValue(g, ShaderProps._EmissionColor);
+            }
         }
 
         // Extra positions on the grid; index 0 is the primary ghost (not included).
@@ -141,9 +174,21 @@ namespace Hoard
         [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
         private static class Player_UpdatePlacementGhost
         {
+            private static int _errors;
+
             private static void Postfix(Player __instance)
             {
                 if (__instance != Player.m_localPlayer) return;
+                try { Update(__instance); }
+                catch (System.Exception e)
+                {
+                    if (_errors++ < 3) Log.Error($"Row planting preview failed: {e}");
+                    ClearGhosts();
+                }
+            }
+
+            private static void Update(Player __instance)
+            {
                 var ghost = __instance.m_placementGhost;
                 var plant = Active(__instance) ? ghost.GetComponent<Plant>() : null;
                 if (plant == null || !ghost.activeSelf)
@@ -189,7 +234,7 @@ namespace Hoard
                     g.SetActive(true);
                     g.transform.position = _positions[i];
                     g.transform.rotation = ghost.transform.rotation;
-                    g.GetComponent<Piece>()?.SetInvalidPlacementHeightlight(!_valid[i]);
+                    Tint(g, !_valid[i]);
                 }
                 for (int i = _positions.Count; i < _ghosts.Count; i++) if (_ghosts[i]) _ghosts[i].SetActive(false);
             }
