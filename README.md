@@ -50,6 +50,9 @@ Client-side only: the server needs nothing, and other players don't need the mod
 | **Surface run speed** | Run faster on made surfaces: dirt paths +50%, paved paths +70%, wood floors +60%, stone floors +70% by default (cultivated soil and iron grates configurable too), and running there drains half the stamina. Applies while running only. |
 | **Row planting** | With the cultivator, plant a row or a block in one click. **Alt + scroll** sets the row length, **Alt + Shift + scroll** the number of rows, **N** toggles fill mode (the row runs until the ground stops being plantable, something is in the way, or the seeds run out). Extra ghosts preview it; red ones are skipped. Seeds in nearby chests count when craft-from-containers is on. |
 | **Recycle** | At a crafting station, a **Recycle** tab appears next to Craft and Upgrade. Drag an item from your inventory onto it to get its crafting materials back, including what every upgrade level cost. Materials that can't go through a portal (metals, ores) are **never** returned, so recycling can't move metal past a portal; the confirmation lists what comes back and what is forfeited. Food and mead are excluded by default. |
+| **Area repair** (`'`) | Repairs every damaged build piece within 20 m in one key press, no hammer needed. Follows the hammer's rules: a piece that needs a crafting station is only repaired with that station in range, and only your own pieces by default. |
+| **Instant loot** | Killed creatures drop their loot the moment they die instead of when the corpse despawns; the ragdoll is removed right after. |
+| **Achievements** | Optional (off by default): let a modded game earn Steam achievements as if it were vanilla. Section 18 in the settings. |
 | **Settings** | **F7** opens the settings window (scales with the game's UI scale; extra factor in *Config window scale*). Every change applies immediately and is saved. Editing the `.cfg` file while playing also applies live. |
 
 ## Multiplayer
@@ -59,6 +62,11 @@ is what the game itself does when you open a chest or take-all from it, and a ch
 another player currently has open is never touched. Ships are excluded from area
 operations by default, carts are included when nobody is pulling them, tombstones and
 dungeon chests are never used.
+
+## Coming from other mods
+
+Hoard also covers what Instant Building Repair, Instant Monster Drop and Valheim
+Achievements Enabler did; remove those too (Hoard refuses to load next to them).
 
 ## Coming from EquipmentAndQuickSlots
 
@@ -96,5 +104,10 @@ runtime the plugin applies its patches all-or-nothing and unpatches itself if an
   (Goldenrevolver, MIT) — feature set and semantics of the stacking/sorting tools.
 - [AzuCraftyBoxes](https://github.com/AzumattDev/AzuCraftyBoxes) (Azumatt, MIT) — the
   craft-from-containers approach.
+- [Instant Building Repair](https://www.nexusmods.com/valheim/mods/1277) and
+  [Instant Monster Drop](https://www.nexusmods.com/valheim/mods/164) (aedenthorn, public
+  domain) — the area repair and instant loot behaviour.
+- [Valheim Achievements Enabler](https://www.nexusmods.com/valheim/mods/3611)
+  (DarkmoonBlade) — the idea behind the achievements switch; reimplemented, no code shared.
 
 MIT licensed.

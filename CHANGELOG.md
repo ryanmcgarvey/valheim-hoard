@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+- **Area repair** (section 16): one key (`'` by default) repairs every damaged build piece
+  within range, under the hammer's own rules (crafting station in range, own pieces only
+  unless allowed). Replaces Instant Building Repair.
+- **Instant loot** (section 17): creatures drop their loot on death instead of when the
+  ragdoll despawns; the corpse is removed right after. The game's own DestroyNow is skipped
+  for ragdolls this module handled, so loot is never spawned twice, and only the ragdoll's
+  owner spawns it, as in vanilla. Replaces Instant Monster Drop.
+- **Achievements** (section 18, off by default): `Achievements.CanGetAchievements` answers
+  yes, so a modded game earns Steam achievements. Replaces Valheim Achievements Enabler.
+- Hoard now refuses to load next to those three mods, like the ones it replaced before.
+
 ## 0.6.5 — 2026-09-12
 
 - Fix: the row-planting preview threw an exception every frame (the extra ghosts were

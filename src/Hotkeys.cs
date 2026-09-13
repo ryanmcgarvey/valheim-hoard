@@ -15,6 +15,7 @@ namespace Hoard
 
                 if (HoardConfig.QuickStackEnabled.Value && HoardConfig.QuickStackKey.Value.IsDown()) { QuickStack.Run(__instance); return; }
                 if (HoardConfig.RestockEnabled.Value && HoardConfig.RestockKey.Value.IsDown()) { Restock.Run(__instance); return; }
+                if (HoardConfig.RepairEnabled.Value && HoardConfig.RepairKey.Value.IsDown()) { AreaRepair.Run(__instance); return; }
 
                 if (!InventoryGui.IsVisible()) return;
                 if (HoardConfig.SortEnabled.Value && HoardConfig.SortKey.Value.IsDown()) { Sorting.Run(__instance); return; }

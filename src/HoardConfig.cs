@@ -128,6 +128,18 @@ namespace Hoard
         public static ConfigEntry<string> RecycleNeverReturn;
         public static ConfigEntry<KeyboardShortcut> RecycleKey;
 
+        // ---- Area repair
+        public static ConfigEntry<bool> RepairEnabled, RepairNeedsStation, RepairOthersPieces, RepairMessages;
+        public static ConfigEntry<KeyboardShortcut> RepairKey;
+        public static ConfigEntry<float> RepairRange;
+
+        // ---- Instant loot
+        public static ConfigEntry<bool> InstantLootEnabled;
+        public static ConfigEntry<float> InstantLootRagdollSeconds;
+
+        // ---- Achievements
+        public static ConfigEntry<bool> AchievementsWhileModded;
+
         public enum SortCriteria { Type, Name, Weight, Value, InternalName }
         public enum AutoSort { Never, Inventory, Container, Both }
 
@@ -269,6 +281,21 @@ namespace Hoard
             RecycleConfirm = cfg.Bind(s, "Confirm", true, "Show what you'll get back (and what is forfeited) before recycling.");
             RecycleNeverReturn = cfg.Bind(s, "Never return", "", "Comma-separated item names (prefab or $item_ names) that are forfeited on top of the non-portable ones.");
             RecycleKey = cfg.Bind(s, "Key", KeyboardShortcut.Empty, "Recycle the item being dragged (at a crafting station).");
+
+            s = "16 - Area repair";
+            RepairEnabled = cfg.Bind(s, "Enabled", true, "Repair every damaged build piece around you with one key press, no hammer needed.");
+            RepairKey = cfg.Bind(s, "Key", new KeyboardShortcut(KeyCode.Quote), "Area repair hotkey.");
+            RepairRange = cfg.Bind(s, "Range", 20f, new ConfigDescription("Pieces within this many metres are repaired.", new AcceptableValueRange<float>(1f, 100f)));
+            RepairNeedsStation = cfg.Bind(s, "Needs crafting station", true, "A piece that requires a crafting station is only repaired while that station is in range - the same rule the hammer follows.");
+            RepairOthersPieces = cfg.Bind(s, "Repair pieces built by others", false, "Also repair pieces you did not build.");
+            RepairMessages = cfg.Bind(s, "Result message", true, "Show how many pieces were repaired.");
+
+            s = "17 - Instant loot";
+            InstantLootEnabled = cfg.Bind(s, "Enabled", true, "Killed creatures drop their loot immediately instead of when the corpse despawns.");
+            InstantLootRagdollSeconds = cfg.Bind(s, "Corpse lingers for", 0.05f, new ConfigDescription("Seconds the ragdoll stays after the loot has dropped.", new AcceptableValueRange<float>(0f, 30f)));
+
+            s = "18 - Achievements";
+            AchievementsWhileModded = cfg.Bind(s, "Earn achievements while modded", false, "Let this modded game award Steam achievements as if it were vanilla. Off by default; turn it on if you want modded play to count.");
 
             // Live hooks: the slot region depends on these.
             EquipmentSlots.SettingChanged += (_, __) => Slots.OnSlotActivationChanged();

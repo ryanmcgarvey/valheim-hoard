@@ -10,6 +10,9 @@ namespace Hoard
     [BepInIncompatibility("goldenrevolver.quick_stack_store")]
     [BepInIncompatibility("Azumatt.AzuCraftyBoxes")]
     [BepInIncompatibility("org.bepinex.plugins.valheimstorage")]
+    [BepInIncompatibility("aedenthorn.BuildingRepair")]
+    [BepInIncompatibility("aedenthorn.InstantMonsterDrop")]
+    [BepInIncompatibility("DarkmoonBlade.ValheimAchievementsEnabler")]
     public class Plugin : BaseUnityPlugin
     {
         public const string Guid = "com.ryan.hoard";
