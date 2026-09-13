@@ -216,13 +216,18 @@ namespace Hoard
                 if (!placedPrimary || _positions.Count == 0) return;
                 bool free = __instance.m_noPlacementCost || ZoneSystem.instance.GetGlobalKey(piece.FreeBuildKey());
                 var rot = __instance.m_placementGhost.transform.rotation;
+                // Snapshot: paying for a plant changes the inventory, which makes the game rebuild
+                // the placement ghost (Player.UpdateAvailablePiecesList -> SetupPlacementGhost),
+                // and that clears the live lists while this loop is still walking them.
+                var positions = _positions.ToArray();
+                var valid = _valid.ToArray();
                 int placed = 0;
-                for (int i = 0; i < _positions.Count; i++)
+                for (int i = 0; i < positions.Length; i++)
                 {
-                    if (!_valid[i]) continue;
+                    if (!valid[i]) continue;
                     // The primary's cost is consumed by the caller after this; keep one set aside.
                     if (!free && Affordable(__instance, piece) < 2) break;
-                    __instance.PlacePiece(piece, _positions[i], rot, doAttack: false);
+                    __instance.PlacePiece(piece, positions[i], rot, doAttack: false);
                     if (!free) __instance.ConsumeResources(piece.m_resources, 0);
                     placed++;
                 }
@@ -234,8 +239,23 @@ namespace Hoard
             }
         }
 
+        // The ghost is rebuilt whenever the inventory changes (so after every planting), and
+        // the rebuild re-rolls the rotation of random-rotation pieces. Keep ours.
         [HarmonyPatch(typeof(Player), nameof(Player.SetupPlacementGhost))]
-        private static class Player_SetupPlacementGhost { private static void Prefix() => ClearGhosts(); }
+        private static class Player_SetupPlacementGhost
+        {
+            private static void Prefix(Player __instance, ref int __state)
+            {
+                ClearGhosts();
+                __state = __instance.m_placeRotation;
+            }
+
+            private static void Postfix(Player __instance, int __state)
+            {
+                if (!Enabled || !HoardConfig.RowKeepRotation.Value || __instance != Player.m_localPlayer) return;
+                if (PlantOf(__instance) != null) __instance.m_placeRotation = __state;
+            }
+        }
 
         [HarmonyPatch(typeof(Player), nameof(Player.OnDestroy))]
         private static class Player_OnDestroy { private static void Postfix() => ClearGhosts(); }

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.4 — 2026-09-12
+
+- Fix: row planting placed only one or two extra plants. Paying for a plant changes the
+  inventory, which makes the game rebuild the placement ghost mid-placement and wiped the
+  list of positions still to plant. The list is now snapshotted first.
+- Fix: the row direction still changed after planting. The same ghost rebuild re-rolls the
+  rotation of random-rotation pieces; the rotation is now kept across rebuilds too.
+
 ## 0.6.3 — 2026-09-12
 
 - The Sort/Stack/Restock/Trash buttons moved into Hoard's own panel, in a row under the
