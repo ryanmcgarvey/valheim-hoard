@@ -12,6 +12,8 @@
 - **Achievements** (section 18, off by default): `Achievements.CanGetAchievements` answers
   yes, so a modded game earns Steam achievements. Replaces Valheim Achievements Enabler.
 - Hoard now refuses to load next to those three mods, like the ones it replaced before.
+- Settings window: sections are listed in numeric order (10 no longer follows 1), and a
+  contents bar under the search box jumps to any section with one click.
 
 ## 0.6.5 — 2026-09-12
 

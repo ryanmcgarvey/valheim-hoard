@@ -21,7 +21,11 @@ namespace Hoard
         private static readonly HashSet<string> _collapsed = new HashSet<string>();
         private static ConfigEntryBase _binding;
         private static readonly Dictionary<ConfigEntryBase, string> _textBuffers = new Dictionary<ConfigEntryBase, string>();
-        private static GUIStyle _header, _section, _desc, _box;
+        private static GUIStyle _header, _section, _desc, _box, _jump;
+        // Contents bar: section -> y of its header inside the scroll view (recorded on repaint),
+        // and the section a click asked to scroll to.
+        private static readonly Dictionary<string, float> _sectionY = new Dictionary<string, float>();
+        private static string _jumpTo;
         private static Texture2D _bg;
         private static int _bypass;
 
@@ -63,6 +67,7 @@ namespace Hoard
             _header = new GUIStyle(GUI.skin.label) { fontSize = 16, fontStyle = FontStyle.Bold };
             _section = new GUIStyle(GUI.skin.button) { alignment = TextAnchor.MiddleLeft, fontStyle = FontStyle.Bold, fontSize = 14 };
             _desc = new GUIStyle(GUI.skin.label) { wordWrap = true, fontSize = 11, normal = { textColor = new Color(0.75f, 0.75f, 0.7f) } };
+            _jump = new GUIStyle(GUI.skin.button) { fontSize = 11, padding = new RectOffset(6, 6, 2, 2), margin = new RectOffset(2, 2, 2, 2) };
         }
 
         public static void OnGUI()
@@ -114,6 +119,8 @@ namespace Hoard
             if (GUILayout.Button("Close", GUILayout.Width(60))) SetVisible(false);
             GUILayout.EndHorizontal();
 
+            DrawContents();
+
             _scroll = GUILayout.BeginScrollView(_scroll);
             string q = (_search ?? "").Trim().ToLowerInvariant();
             foreach (var section in Sections())
@@ -128,15 +135,66 @@ namespace Hoard
                 {
                     if (collapsed) _collapsed.Remove(section); else _collapsed.Add(section);
                 }
+                if (Event.current.type == EventType.Repaint) _sectionY[section] = GUILayoutUtility.GetLastRect().y;
                 if (collapsed) continue;
                 foreach (var e in entries) DrawEntry(e);
                 GUILayout.Space(8);
             }
             GUILayout.EndScrollView();
+            // Positions come from this repaint; the scroll takes effect on the next one.
+            if (_jumpTo != null && Event.current.type == EventType.Repaint && _sectionY.TryGetValue(_jumpTo, out float y))
+            {
+                _scroll.y = y;
+                _jumpTo = null;
+            }
             GUI.DragWindow(new Rect(0, 0, 10000, 22));
         }
 
-        private static IEnumerable<string> Sections() => HoardConfig.File.Keys.Select(k => k.Section).Distinct().OrderBy(s => s, StringComparer.Ordinal);
+        // Sections are named "N - Title"; order by N, so 10 comes after 9 and not after 1.
+        private static IEnumerable<string> Sections() =>
+            HoardConfig.File.Keys.Select(k => k.Section).Distinct().OrderBy(SectionNumber).ThenBy(s => s, StringComparer.Ordinal);
+
+        private static int SectionNumber(string section)
+        {
+            int dash = section.IndexOf(" - ", StringComparison.Ordinal);
+            return dash > 0 && int.TryParse(section.Substring(0, dash), out int n) ? n : int.MaxValue;
+        }
+
+        private static string SectionTitle(string section)
+        {
+            int dash = section.IndexOf(" - ", StringComparison.Ordinal);
+            return dash > 0 ? section.Substring(dash + 3) : section;
+        }
+
+        // One small button per section, wrapped into as many rows as the window width needs.
+        // Clicking scrolls the list to that section (and expands it, and clears the search so
+        // it can't be filtered out).
+        private static void DrawContents()
+        {
+            float avail = _rect.width - 30f, used = 0f;
+            GUILayout.BeginHorizontal();
+            foreach (var section in Sections())
+            {
+                var label = new GUIContent(SectionTitle(section));
+                float w = _jump.CalcSize(label).x + 4f;
+                if (used > 0f && used + w > avail)
+                {
+                    GUILayout.EndHorizontal();
+                    GUILayout.BeginHorizontal();
+                    used = 0f;
+                }
+                if (GUILayout.Button(label, _jump, GUILayout.Width(w - 4f)))
+                {
+                    _jumpTo = section;
+                    _collapsed.Remove(section);
+                    _search = "";
+                }
+                used += w;
+            }
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+            GUILayout.Space(4);
+        }
 
         private static void DrawEntry(ConfigEntryBase e)
         {
