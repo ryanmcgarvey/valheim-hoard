@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.0 — 2026-09-14
 
 - **Area repair** (section 16): one key (`'` by default) repairs every damaged build piece
   within range, under the hammer's own rules (crafting station in range, own pieces only
