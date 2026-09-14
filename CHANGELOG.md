@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.1 — 2026-09-14
+
+- Area repair reports once per key press instead of flashing the game's "missing
+  station" message for every skipped piece: "Repaired N pieces", with counts of pieces
+  skipped for lacking a crafting station in range or for not being yours.
+
 ## 0.7.0 — 2026-09-14
 
 - **Area repair** (section 16): one key (`'` by default) repairs every damaged build piece

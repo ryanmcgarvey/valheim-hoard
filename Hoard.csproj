@@ -15,7 +15,7 @@
     <LangVersion>latest</LangVersion>
     <AssemblyName>Hoard</AssemblyName>
     <RootNamespace>Hoard</RootNamespace>
-    <Version>0.7.0</Version>
+    <Version>0.7.1</Version>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <Deterministic>true</Deterministic>

@@ -17,7 +17,7 @@ namespace Hoard
     {
         public const string Guid = "com.ryan.hoard";
         public const string Name = "Hoard";
-        public const string Version = "0.7.0";
+        public const string Version = "0.7.1";
 
         private Harmony _harmony;
         private FileSystemWatcher _watcher;
